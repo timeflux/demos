@@ -1,0 +1,108 @@
+graphs:
+
+  - id: Broker
+    nodes:
+    - id: proxy
+      module: timeflux.nodes.zmq
+      class: Broker
+
+  {% for PORT in PORTS.split() %}
+  - id: EEG_{{ loop.index }}
+    nodes:
+    - id: eeg
+      module: timeflux_brainflow.nodes.driver
+      class: BrainFlow
+      params:
+        board: freeeeg32
+        channels: [O2, T6, T4, F8, FP2, F4, C4, P4, button, unused_1, unused_2, unused_3, PZ, unused_4, unused_5, unused_6, FZ, unused_7, unused_8, unused_9, sync, unused_11, unused_12, unused_13, FP1, F3, C3, P3, O1, T5, T3, F7]
+        serial_port: {{ PORT }}
+        rate: {{ RATE }}
+        debug: false
+    - id: downsample
+      module: timeflux_dsp.nodes.filters
+      class: DropRows
+      params:
+        factor: {{ DECIMATE }}
+    - id: notch
+      module: timeflux_dsp.nodes.filters
+      class: IIRLineFilter
+      params:
+        rate: {{ RATE }}
+    - id: bandpass
+      module: timeflux_dsp.nodes.filters
+      class: IIRFilter
+      params:
+        rate: {{ RATE }}
+        order: 3
+        frequencies: [1, 40]
+    - id: pub_raw
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw_{{ loop.index }}
+    - id: pub_filtered
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: filtered_{{ loop.index }}
+    edges:
+      - source: eeg
+        target: pub_raw
+      - source: eeg
+      {% if NOTCH %}
+        target: notch
+      - source: notch
+      {% endif %}
+        target: bandpass
+      - source: bandpass
+        target: pub_filtered
+    rate: 10
+  {% endfor %}
+
+  - id: UI
+    nodes:
+    - id: ui
+      module: timeflux_ui.nodes.ui
+      class: UI
+      params:
+        settings:
+          monitor:
+            minValue: -150
+            maxValue: 150
+            lineWidth: 1
+    - id: sub
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics:
+          {% for PORT in PORTS.split() %}
+          - filtered_{{ loop.index }}
+          {% endfor %}
+    edges:
+    {% for PORT in PORTS.split() %}
+    - source: sub:filtered_{{ loop.index }}
+      target: ui:eeg_{{ loop.index }}
+    {% endfor %}
+    rate: 0
+
+  - id: Recorder
+    nodes:
+    - id: sub
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics:
+          {% for PORT in PORTS.split() %}
+          - raw_{{ loop.index }}
+          {% endfor %}
+    - id: save
+      module: timeflux.nodes.hdf5
+      class: Save
+      params:
+        path: data
+    edges:
+      {% for PORT in PORTS.split() %}
+      - source: sub:raw_{{ loop.index }}
+        target: save:eeg_{{ loop.index }}
+      {% endfor %}
+    rate: .1
