@@ -4,7 +4,7 @@ This is an example on how one can leverage Timelux's [environment](https://doc.t
 
 Configure your environment in the [.env](.env) file.
 
-Run it:
+Run the app:
 
 ```
 $ timeflux main.yaml
