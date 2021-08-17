@@ -70,6 +70,7 @@ graphs:
             minValue: -150
             maxValue: 150
             lineWidth: 1
+            events: [ control_start, control_stop, meditation_start, meditation_stop, observation ]
     - id: sub
       module: timeflux.nodes.zmq
       class: Sub
@@ -78,11 +79,23 @@ graphs:
           {% for PORT in PORTS.split() %}
           - filtered_{{ loop.index }}
           {% endfor %}
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: events
+    - id: display
+      module: timeflux.nodes.debug
+      class: Display
     edges:
     {% for PORT in PORTS.split() %}
     - source: sub:filtered_{{ loop.index }}
       target: ui:eeg_{{ loop.index }}
     {% endfor %}
+    - source: ui:events
+      target: display
+    - source: ui:events
+      target: pub
     rate: 0
 
   - id: Recorder
@@ -95,14 +108,17 @@ graphs:
           {% for PORT in PORTS.split() %}
           - raw_{{ loop.index }}
           {% endfor %}
+          - events
     - id: save
       module: timeflux.nodes.hdf5
       class: Save
       params:
-        path: data
+        path: {{ TIMEFLUX_DATA_PATH }}
     edges:
       {% for PORT in PORTS.split() %}
       - source: sub:raw_{{ loop.index }}
         target: save:eeg_{{ loop.index }}
       {% endfor %}
+      - source: sub:events
+        target: save:events
     rate: .1
