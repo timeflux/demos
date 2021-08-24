@@ -14,10 +14,15 @@ graphs:
       class: BrainFlow
       params:
         board: freeeeg32
-        channels: [O2, T6, T4, F8, FP2, F4, C4, P4, button, unused_1, unused_2, unused_3, PZ, unused_4, unused_5, unused_6, FZ, unused_7, unused_8, unused_9, sync, unused_11, unused_12, unused_13, FP1, F3, C3, P3, O1, T5, T3, F7]
+        channels: [O2, T6, T4, F8, Fp2, F4, C4, P4, button, unused_1, unused_2, unused_3, Pz, unused_4, unused_5, unused_6, Fz, unused_7, unused_8, unused_9, sync, unused_11, unused_12, unused_13, Fp1, F3, C3, P3, O1, T5, T3, F7]
         serial_port: {{ PORT }}
         rate: {{ RATE }}
         debug: false
+    - id: select
+      module: timeflux.nodes.query
+      class: LocQuery
+      params:
+        key: [counter, timestamp, O2, T6, T4, F8, Fp2, F4, C4, P4, button, Pz, Fz, sync, Fp1, F3, C3, P3, O1, T5, T3, F7]
     - id: downsample
       module: timeflux_dsp.nodes.filters
       class: DropRows
@@ -47,8 +52,12 @@ graphs:
         topic: filtered_{{ loop.index }}
     edges:
       - source: eeg
+        target: select
+      - source: select
         target: pub_raw
-      - source: eeg
+      - source: select
+        target: downsample
+      - source: downsample
       {% if NOTCH %}
         target: notch
       - source: notch
@@ -114,6 +123,7 @@ graphs:
       class: Save
       params:
         path: {{ TIMEFLUX_DATA_PATH }}
+        min_itemsize: 200
     edges:
       {% for PORT in PORTS.split() %}
       - source: sub:raw_{{ loop.index }}
