@@ -1,6 +1,7 @@
 import:
   #- graphs/synthetic.yaml
-  - graphs/cyton.yaml
+  - graphs/replay.yaml
+  #- graphs/cyton.yaml
 
 graphs:
 
