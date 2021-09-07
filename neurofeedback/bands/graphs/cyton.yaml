@@ -1,0 +1,20 @@
+graphs:
+
+  - id: eeg
+    nodes:
+    - id: acquire
+      module: timeflux_openbci.nodes.driver
+      class: OpenBCI
+      params:
+        board: cyton
+        serial_port: /dev/cu.usbserial-DQ0084BO
+        channels: [ Fpz, AF7, AF8, Oz, O1, O2, P7, P8 ]
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+    edges:
+    - source: acquire
+      target: pub
+    rate: 10

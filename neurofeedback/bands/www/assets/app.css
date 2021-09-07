@@ -1,0 +1,9 @@
+table {
+    white-space: nowrap;
+}
+td:last-child {
+  width: 100%;
+}
+progress {
+    width: 100%;
+}

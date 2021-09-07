@@ -1,0 +1,37 @@
+graphs:
+  
+  - id: eeg
+    nodes:
+    - id: acquire
+      module: timeflux_brainflow.nodes.driver
+      class: BrainFlow
+      params:
+        board: synthetic
+    - id: select
+      module: timeflux.nodes.query
+      class: LocQuery
+      params:
+        key: [ eeg_1, eeg_2, eeg_3, eeg_4, eeg_5, eeg_6, eeg_7, eeg_8 ]
+    - id: rename
+      module: timeflux.nodes.axis
+      class: RenameColumns
+      params:
+        names: [ Fpz, AF7, AF8, Oz, O1, O2, P7, P8 ]
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+    - id: display
+      module: timeflux.nodes.debug
+      class: Display
+      params:
+        meta: true
+    edges:
+    - source: acquire
+      target: select
+    - source: select
+      target: rename
+    - source: rename
+      target: pub
+    rate: 10
