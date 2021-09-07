@@ -7,3 +7,12 @@ td:last-child {
 progress {
     width: 100%;
 }
+table td {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+img {
+  min-height: 60px;
+  min-width: 50px;
+}
