@@ -6,7 +6,7 @@ import warnings
 from tables.exceptions import NaturalNameWarning
 warnings.simplefilter("ignore", NaturalNameWarning)
 
-
+# Settings
 THRESHOLD = 562500
 CHANNEL = "sync"
 GROUP = "/eeg/"
@@ -32,7 +32,7 @@ def sync(input, output=None):
             "meta": {}
         }
         if store.get_node(key)._v_attrs.__contains__("meta"):
-            node["meta"] = store.get_node(key)._v_attrs["meta"]
+            node["meta"] = store.get_node(key)._v_attrs["metlsa"]
         nodes.append(node)
     store.close()
 
@@ -40,7 +40,7 @@ def sync(input, output=None):
     for node in nodes:
         df = pd.read_hdf(input, node["name"])
         if node["name"].startswith(GROUP):
-            # Sync
+            # Get onset and trim
             start = df.loc[df[CHANNEL] == THRESHOLD].index[0]
             print(f"{node['name']}\t{start}")
             df = df[start:]
