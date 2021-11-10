@@ -32,7 +32,7 @@ def sync(input, output=None):
             "meta": {}
         }
         if store.get_node(key)._v_attrs.__contains__("meta"):
-            node["meta"] = store.get_node(key)._v_attrs["metlsa"]
+            node["meta"] = store.get_node(key)._v_attrs["meta"]
         nodes.append(node)
     store.close()
 
