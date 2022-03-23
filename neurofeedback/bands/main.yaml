@@ -49,7 +49,7 @@ graphs:
           'gamma': {frequencies: [25, 40], order: 3}
         design: butter
     - id: band_powers
-      module: modules.power
+      module: nodes.power
       class: Power
       params:
         length: 3

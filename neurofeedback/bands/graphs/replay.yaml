@@ -21,7 +21,7 @@ graphs:
       params:
         names: [ Fpz ]
     - id: convert
-      module: modules.unit
+      module: nodes.unit
       class: ConvertUnit
       params:
         unit: uV
