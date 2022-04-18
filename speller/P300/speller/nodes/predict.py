@@ -7,6 +7,9 @@ from timeflux.helpers.port import match_events, make_event
 
 
 class Best(Node):
+    """ ASAP, but with a direct accumulation of probabilities,
+    and with classification taken after n flashes.
+    """
 
     def __init__(self):
         self.ready = False
@@ -77,6 +80,9 @@ class Best(Node):
 
 
 class InferBlock(Node):
+    """ ASAP, with a Bayesian accumulation of probabilities,
+    and with classification taken after n flashes.
+    """
 
     def __init__(self):
         self.ready = False
@@ -140,7 +146,7 @@ class InferBlock(Node):
                             break
 
     def _init(self, setup):
-        self.infer = CumP300Classifier(len(self.chars))
+        self.infer = ASAP(len(self.chars))
 
     def _update(self, proba, group):
         mask = np.zeros(len(self.chars))
@@ -153,6 +159,9 @@ class InferBlock(Node):
 
 
 class InferContinuous(Node):
+    """ ASAP, with a Bayesian accumulation of probabilities,
+    and with early classification (dynamic stopping).
+    """
 
     def __init__(self, threshold=3):
         self.threshold = threshold
@@ -202,7 +211,7 @@ class InferContinuous(Node):
                             self._reset()
 
     def _init(self, setup):
-        self.infer = CumP300Classifier(len(self.chars))
+        self.infer = ASAP(len(self.chars))
 
     def _update(self, proba, group):
         mask = np.zeros(len(self.chars))
@@ -215,11 +224,12 @@ class InferContinuous(Node):
         self.time = datetime.fromtimestamp(time() + (3600 * 24))
 
 
-class CumP300Classifier():
+class ASAP():
+    """ ASAP for P300-speller.
 
-    """Classification of characters of the P300-speller,
-    using a cumulative-trial MAP based classifier, processing target and
-    non-target responses to the flash and giving a probability after each flash.
+    Bayesian accumulation of Riemannian probabilities for P300-speller,
+    processing target and non-target responses to the flash
+    and updating each character probability after each trial.
 
     Parameters
     ----------
@@ -245,8 +255,8 @@ class CumP300Classifier():
 
         Returns
         -------
-        self : CumP300Classifier instance
-            The CumP300Classifier instance.
+        self : ASAP instance
+            The ASAP instance.
         """
         if character_prior is None:
             self.character_prior = np.ones(self.n_characters)
@@ -304,5 +314,3 @@ class CumP300Classifier():
         character_proba = self.character_proba / sum
 
         return character_proba
-
-
