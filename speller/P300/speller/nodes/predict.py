@@ -6,9 +6,8 @@ from timeflux.core.node import Node
 from timeflux.helpers.port import match_events, make_event
 
 
-class Best(Node):
-    """ ASAP, but with a direct accumulation of probabilities,
-    and with classification taken after n flashes.
+class Direct(Node):
+    """ Direct accumulation of probabilities, no early stopping.
     """
 
     def __init__(self):
@@ -79,9 +78,8 @@ class Best(Node):
 
 
 
-class InferBlock(Node):
-    """ ASAP, with a Bayesian accumulation of probabilities,
-    and with classification taken after n flashes.
+class ASAP(Node):
+    """ ASAP (Bayesian accumulation of probabilities), no early stopping.
     """
 
     def __init__(self):
@@ -146,7 +144,7 @@ class InferBlock(Node):
                             break
 
     def _init(self, setup):
-        self.infer = ASAP(len(self.chars))
+        self.infer = ASAP_Accumulation(len(self.chars))
 
     def _update(self, proba, group):
         mask = np.zeros(len(self.chars))
@@ -158,9 +156,12 @@ class InferBlock(Node):
         self.infer.reset()
 
 
-class InferContinuous(Node):
-    """ ASAP, with a Bayesian accumulation of probabilities,
-    and with early classification (dynamic stopping).
+class ASAP_DynamicStopping(Node):
+    """ ASAP (Bayesian accumulation of probabilities) with early stopping rule.
+
+    Args:
+        threshold (float): ratio between the two better scores above which we feel
+            confident enough to make a prediction. Default: ``2``.
     """
 
     def __init__(self, threshold=3):
@@ -203,7 +204,9 @@ class InferContinuous(Node):
                         group = meta.pop(0)["epoch"]["context"]["group"]
                         self._update(proba, group)
                         indices = np.flip(np.argsort(self.scores))
-                        if self.scores[indices[0]] / self.scores[indices[1]] >= self.threshold:
+                        ratio = self.scores[indices[0]] / self.scores[indices[1]]
+                        self.logger.debug(f"Ratio {self.chars[indices[0]]}/{self.chars[indices[1]]}: {ratio}")
+                        if ratio >= self.threshold:
                             char = self.chars[indices[0]]
                             self.o.data = make_event("predict", {"target": char}, False)
                             self.logger.debug(f"Scores:\n{self.scores}")
@@ -211,7 +214,7 @@ class InferContinuous(Node):
                             self._reset()
 
     def _init(self, setup):
-        self.infer = ASAP(len(self.chars))
+        self.infer = ASAP_Accumulation(len(self.chars))
 
     def _update(self, proba, group):
         mask = np.zeros(len(self.chars))
@@ -224,7 +227,7 @@ class InferContinuous(Node):
         self.time = datetime.fromtimestamp(time() + (3600 * 24))
 
 
-class ASAP():
+class ASAP_Accumulation():
     """ ASAP for P300-speller.
 
     Bayesian accumulation of Riemannian probabilities for P300-speller,
