@@ -1,0 +1,100 @@
+:root {
+    --back: #CCCCCC;
+    --cell-size: 40px;
+    --back-on: #CCCCCC;
+    --front-on: #808080;
+    --back-off: #808080;
+    --front-off: #CCCCCC;
+    --back-odd: #FFFF00;
+    --front-odd: #FF0000;
+    --marker-size: 60px;
+    --marker-color: #000000;
+    --marker-thickness: 6px;
+    --photodiode-size: 90px;
+}
+
+body {
+    background-color: var(--back);
+}
+
+.checkerboard {
+    background-color: var(--back);
+    background: repeating-conic-gradient(var(--front) 0deg 25%, var(--back) 0deg 50%);
+    background-size: calc(var(--cell-size) * 2) calc(var(--cell-size) * 2);
+    border: 1px solid black;
+}
+
+.checkerboard.on {
+    --back: var(--back-on);
+    --front: var(--front-on);
+}
+
+.checkerboard.off {
+    --back: var(--back-off);
+    --front: var(--front-off);
+}
+
+.checkerboard.odd {
+    --back: var(--back-odd);
+    --front: var(--front-odd);
+}
+
+/*.checkerboard_linear {
+    background-color: var(--back);
+    background-image:
+        linear-gradient(45deg, var(--front) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--front) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--front) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--front) 75%);
+    background-size: calc(var(--size) * 2) calc(var(--size) * 2);
+    background-position: 0 0, 0 var(--size), var(--size) calc(var(--size) * -1), calc(var(--size) * -1) 0px;
+}*/
+
+.marker {
+  width: var(--marker-size);
+  height: var(--marker-size);
+  background:
+    linear-gradient(var(--marker-color), var(--marker-color)),
+    linear-gradient(var(--marker-color), var(--marker-color));
+  background-position: center;
+  background-size: 100% var(--marker-thickness), var(--marker-thickness) 100%;
+  background-repeat: no-repeat;
+}
+
+.photodiode {
+    width: var(--photodiode-size);
+    height: var(--photodiode-size);
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    border-radius: 50%;
+    background-color: #000;
+}
+
+.photodiode.on {
+    background-color: #FFF;
+}
+
+.center {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.hidden {
+    display: none;
+}
+
+.no_cursor {
+    cursor: none;
+}
+
+#start {
+    background-color: #555;
+    border: none;
+    color: white;
+    font-size: 16px;
+    height: 50px;
+    width: 200px;
+}

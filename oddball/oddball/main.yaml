@@ -1,0 +1,121 @@
+graphs:
+
+  - id: protocol
+    nodes:
+    - id: ui
+      module: timeflux_ui.nodes.ui
+      class: UI
+      params:
+        # The application is available at http://localhost:8000/oddball/
+        # Please use Chrome as it is the only browser that is well tested for now
+        routes:
+          # This assumes that the oddball directory is in the current directory
+          # Adjust if necessary
+          oddball: ./www
+        # The full list of options is available here:
+        # https://github.com/timeflux/demos/blob/master/oddball/oddball/assets/js/app.js#L18
+        settings:
+          oddball:
+            photodiode:
+              enabled: false # Set to "true" to display the photodiode patch on the bottom-left corner
+    - id: publish
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: events
+    - id: subscribe
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics: [ eeg ]
+    edges:
+      - source: ui:events
+        target: publish
+      - source: subscribe:eeg
+        target: ui:eeg
+    rate: 30
+
+  - id: eeg
+    nodes:
+    - id: data
+      # This assumes EEG data is received through a LSL stream
+      # Change this node as appropriate
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: name
+        value: my_lsl_stream # Set the name of the LSL stream here
+        sync: local # Set to "local" if the LSL stream originates from the same computer, or "network" otherwise
+    - id: publish
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: eeg
+    edges:
+      - source: data
+        target: publish
+    rate: 10
+
+  # Uncomment this graph if you want to use a photodiode
+  # We already validated that the events are synchronized with screen refresh, so this is not strictly required
+  # There is a sensor firmware for Arduino and generic Timeflux plugin here: https://github.com/mesca/timeflux_serial
+  # - id: photodiode
+  #   nodes:
+  #   - id: arduino
+  #     module: timeflux_serial.nodes.driver
+  #     class: SerialDevice
+  #     params:
+  #       port: /dev/tty.SLAB_USBtoUART # Find the correct port on your computer
+  #       rate: 1000
+  #   - id: publish
+  #     module: timeflux.nodes.zmq
+  #     class: Pub
+  #     params:
+  #       topic: photodiode
+  #   edges:
+  #   - source: arduino
+  #     target: publish
+  #   rate: 40
+
+  # Uncomment this graph if you want to print debug information in the console
+  # - id: display
+  #   nodes:
+  #   - id: subscribe
+  #     module: timeflux.nodes.zmq
+  #     class: Sub
+  #     params:
+  #       topics: [ photodiode, events, eeg ]
+  #   - id: debug
+  #     module: timeflux.nodes.debug
+  #     class: Display
+  #   edges:
+  #     - source: subscribe:events
+  #       target: debug
+  #   rate: 1
+
+  - id: recorder
+    nodes:
+    - id: subscribe
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics: [ events, eeg, photodiode ]
+    - id: save
+      module: timeflux.nodes.hdf5
+      class: Save
+      params:
+        path: ./data # The HDF5 file will be saved in this directory
+    edges:
+      - source: subscribe:events
+        target: save:events
+      - source: subscribe:eeg
+        target: save:eeg
+      - source: subscribe:photodiode
+        target: save:photodiode
+    rate: 1
+
+  - id: broker
+    nodes:
+    - id: broker
+      module: timeflux.nodes.zmq
+      class: Broker

@@ -29,8 +29,9 @@ graphs:
             grid:
               ratio: "1:1"
             repetitions:
-              #train: 8
-              test: 0 # Wait until we can make a good prediction
+              train: 8
+              # test: 8 # Make a prediction after n blocks (for Direct and ASAP methods)
+              test: 0 # Wait until we can make a good prediction (for ASAP_DynamicStopping method)
             durations:
               baseline_eyes_open: 0
               baseline_eyes_closed: 0
@@ -95,15 +96,15 @@ graphs:
             class: MDM
     - id: predict
       module: nodes.predict
-      class: InferContinuous
+      class: ASAP_DynamicStopping
       params:
         threshold: 2
     # - id: predict
     #   module: nodes.predict
-    #   class: InferBlock
+    #   class: ASAP
     # - id: predict
-    #   module: nodes.predict
-    #   class: Best
+    #  module: nodes.predict
+    #  class: Direct
     - id: pub
       module: timeflux.nodes.zmq
       class: Pub
