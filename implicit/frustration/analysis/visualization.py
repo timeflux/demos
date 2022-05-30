@@ -15,7 +15,7 @@ snames = ["S1", "S2"]
 
 tmin = -0.2
 baseline = (None, 0)
-l_freq, h_freq = 0.1, 45
+l_freq, h_freq = 0.1, 24
 
 for fname, subject in zip(fnames, snames):
     store = pd.HDFStore(fname, "r")
@@ -78,11 +78,12 @@ for fname, subject in zip(fnames, snames):
         tmin=tmin,
         tmax=0.5,
         baseline=baseline,
-        reject=None,
+        reject={'eeg': 80e-6},
         preload=True,
         verbose=False,
     )
     print(f"Dropped: ", (1 - len(epochs.events) / len(events)) * 100, "%")
+    # epochs.plot_drop_log()
     epochs_orig = epochs.copy()
 
     partition = {"0-10": [], "10-45": [], "45-90": [], "90-135": [], "135-180": []}
@@ -109,11 +110,11 @@ for fname, subject in zip(fnames, snames):
         epochs = mne.epochs.combine_event_ids(epochs, old, new)
 
     evokeds = {
-        "dir_0": epochs["<0"].average().filter(0.1, 15, method="iir"),
-        "dir_45": epochs["<45"].average().filter(0.1, 15, method="iir"),
-        "dir_90": epochs["<90"].average().filter(0.1, 15, method="iir"),
-        "dir_135": epochs["<135"].average().filter(0.1, 15, method="iir"),
-        "dir_180": epochs["<180"].average().filter(0.1, 15, method="iir"),
+        "dir_0": epochs["<0"].average(),
+        "dir_45": epochs["<45"].average(),
+        "dir_90": epochs["<90"].average(),
+        "dir_135": epochs["<135"].average(),
+        "dir_180": epochs["<180"].average(),
     }
     for elec in ["AF7", "AF8", "TP9", "TP10"]:
         nave = ", ".join([str(e.nave) for e in evokeds.values()])
@@ -142,9 +143,9 @@ for fname, subject in zip(fnames, snames):
         epochs = mne.epochs.combine_event_ids(epochs, old, new)
 
     evokeds = {
-        "dir_60": epochs["<60"].average().filter(0.1, 15, method="iir"),
-        "dir_120": epochs["<120"].average().filter(0.1, 15, method="iir"),
-        "dir_180": epochs["<180"].average().filter(0.1, 15, method="iir"),
+        "dir_60": epochs["<60"].average(),
+        "dir_120": epochs["<120"].average(),
+        "dir_180": epochs["<180"].average(),
     }
     for elec in ["AF7", "AF8", "TP9", "TP10"]:
         nave = ", ".join([str(e.nave) for e in evokeds.values()])
