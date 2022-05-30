@@ -8,14 +8,14 @@ import json
 import matplotlib.pyplot as plt
 
 fnames = [
-    "exp_data/20220512-122156-Maryem-Ouihia.hdf5",
-    "exp_data/20220512-142455-Gabin-Lembrez.hdf5",
+    "../exp_data/20220525-120400-S1-Acq2.hdf5",
+    "../exp_data/20220525-125204-S2-Acq2.hdf5",
 ]
-snames = ["maryem", "gabin"]
+snames = ["S1", "S2"]
 
 tmin = -0.2
-baseline = (None, None)
-l_freq, h_freq = 0.1, 35
+baseline = (None, 0)
+l_freq, h_freq = 0.1, 45
 
 for fname, subject in zip(fnames, snames):
     store = pd.HDFStore(fname, "r")
@@ -104,16 +104,16 @@ for fname, subject in zip(fnames, snames):
         partition["90-135"],
         partition["135-180"],
     ]
-    new_event_id = [{"<0": 20}, {"<45": 21}, {"<90": 22}, {"<135": 23}, {"<180": 24}]
+    new_event_id = [{"<0": 100}, {"<45": 101}, {"<90": 102}, {"<135": 103}, {"<180": 104}]
     for old, new in zip(old_event_ids, new_event_id):
         epochs = mne.epochs.combine_event_ids(epochs, old, new)
 
     evokeds = {
-        "dir_0": epochs["<0"].average(),
-        "dir_45": epochs["<45"].average(),
-        "dir_90": epochs["<90"].average(),
-        "dir_135": epochs["<135"].average(),
-        "dir_180": epochs["<180"].average(),
+        "dir_0": epochs["<0"].average().filter(0.1, 15, method="iir"),
+        "dir_45": epochs["<45"].average().filter(0.1, 15, method="iir"),
+        "dir_90": epochs["<90"].average().filter(0.1, 15, method="iir"),
+        "dir_135": epochs["<135"].average().filter(0.1, 15, method="iir"),
+        "dir_180": epochs["<180"].average().filter(0.1, 15, method="iir"),
     }
     for elec in ["AF7", "AF8", "TP9", "TP10"]:
         nave = ", ".join([str(e.nave) for e in evokeds.values()])
@@ -137,14 +137,14 @@ for fname, subject in zip(fnames, snames):
         elif 120 < int(ei) <= 180 and ei not in partition["120-180"]:
             partition["120-180"].append(ei)
     old_event_ids = [partition["0-60"], partition["60-120"], partition["120-180"]]
-    new_event_id = [{"<60": 20}, {"<120": 21}, {"<180": 22}]
+    new_event_id = [{"<60": 100}, {"<120": 101}, {"<180": 102}]
     for old, new in zip(old_event_ids, new_event_id):
         epochs = mne.epochs.combine_event_ids(epochs, old, new)
 
     evokeds = {
-        "dir_60": epochs["<60"].average(),
-        "dir_120": epochs["<120"].average(),
-        "dir_180": epochs["<180"].average(),
+        "dir_60": epochs["<60"].average().filter(0.1, 15, method="iir"),
+        "dir_120": epochs["<120"].average().filter(0.1, 15, method="iir"),
+        "dir_180": epochs["<180"].average().filter(0.1, 15, method="iir"),
     }
     for elec in ["AF7", "AF8", "TP9", "TP10"]:
         nave = ", ".join([str(e.nave) for e in evokeds.values()])
@@ -159,7 +159,7 @@ for fname, subject in zip(fnames, snames):
         plt.close()
 
     elecs = ["AF7", "AF8", "TP9", "TP10"]
-    for evo in evokeds:
+    for evo in ["<60", "<120", "<180"]:
         fig = mne.viz.plot_epochs_image(epochs[evo], vmin=0, vmax=20, show=False)
         fig[0].savefig(f"{subject}-{evo}-erp-gfp.png")
         fig = mne.viz.plot_epochs_image(
@@ -169,18 +169,18 @@ for fname, subject in zip(fnames, snames):
             f.savefig(f"{subject}-{evo}-{e}-erp-.png")
     plt.close("all")
 
-    epochs.pick_types(eeg=True)
-    xd = mne.preprocessing.Xdawn(n_components=2, reg="ledoit_wolf")
-    y = [1 if e == 20 else 0 for e in epochs["<60", "<120"].events[:, 2]]
-    xd.fit(epochs["<60", "<120"], y)
-    ep_xd = xd.apply(epochs)
-    elecs = ["AF7", "AF8", "TP9", "TP10"]
-    for evo in ["<60", "<120"]:
-        fig = mne.viz.plot_epochs_image(ep_xd[evo], vmin=0, vmax=20, show=False)
-        fig[0].savefig(f"{subject}-{evo}-xdawn-erp-gfp.png")
-        fig = mne.viz.plot_epochs_image(
-            epochs[evo], vmin=-10, vmax=10, show=False, picks=elecs, combine=None
-        )
-        for e, f in zip(elecs, fig):
-            f.savefig(f"{subject}-{evo}-xdawn-erp-{e}.png")
-    plt.close("all")
+    # epochs.pick_types(eeg=True)
+    # xd = mne.preprocessing.Xdawn(n_components=2, reg="ledoit_wolf")
+    # y = [1 if e == 20 else 0 for e in epochs["<60", "<120"].events[:, 2]]
+    # xd.fit(epochs["<60", "<120"], y)
+    # ep_xd = xd.apply(epochs)
+    # elecs = ["AF7", "AF8", "TP9", "TP10"]
+    # for evo in ["<60", "<120"]:
+    #     fig = mne.viz.plot_epochs_image(ep_xd[evo], vmin=0, vmax=20, show=False)
+    #     fig[0].savefig(f"{subject}-{evo}-xdawn-erp-gfp.png")
+    #     fig = mne.viz.plot_epochs_image(
+    #         epochs[evo], vmin=-10, vmax=10, show=False, picks=elecs, combine=None
+    #     )
+    #     for e, f in zip(elecs, fig):
+    #         f.savefig(f"{subject}-{evo}-xdawn-erp-{e}.png")
+    # plt.close("all")
