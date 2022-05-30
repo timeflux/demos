@@ -51,7 +51,6 @@ for fname, subject in zip(fnames, snames):
         theta = get_ang(cursor_prev, target, cursor_curr)
         angles.append(f"{theta:.0f}")
     annotations = mne.Annotations(onsets, 0, angles, orig_time=0)
-    annotations
 
     signal = store.select("eeg")
     channels = list(signal.columns.values)
@@ -160,7 +159,7 @@ for fname, subject in zip(fnames, snames):
         plt.close()
 
     elecs = ["AF7", "AF8", "TP9", "TP10"]
-    for evo in eovkeds:
+    for evo in evokeds:
         fig = mne.viz.plot_epochs_image(epochs[evo], vmin=0, vmax=20, show=False)
         fig[0].savefig(f"{subject}-{evo}-erp-gfp.png")
         fig = mne.viz.plot_epochs_image(
