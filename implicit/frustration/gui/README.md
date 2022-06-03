@@ -9,4 +9,7 @@ Label                           | Data
 ``running``                     | ``null``
 ``grid``                        | ``{"rows": <number>, "columns": <number>, "target": <number id>, "cursor": <number id>}``
 ``step``                        | ``{"win": <bool>, "cursor": <number id>}``
-``key``                         | ``{"key": <bool>}``
+
+## ``Cells IDs`` on the grid
+
+![alt text](./img/cells_ids.png)

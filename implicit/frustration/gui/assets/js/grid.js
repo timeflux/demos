@@ -65,7 +65,7 @@ class Cell {
    * Show the cell
    */
   show() {
-    this.draw.circle(this.x, this.y, this.radius, this.options.colors.cells);
+    this.draw.circle(this.x, this.y, this.radius, this.options.colors.cell);
   }
 
   /**
