@@ -20,8 +20,13 @@ graphs:
         class: Pub
         params:
           topic: eeg
+      - id: reindex
+        module: timeflux.nodes.dejitter
+        class:  Reindex
     edges:
       - source: eeg
+        target: reindex
+      - source: reindex
         target: pub_eeg
     rate: 5
 
@@ -36,8 +41,8 @@ graphs:
           settings:
             grid:
               grid:
-                rows: 3
-                columns: 3
+                rows: 4
+                columns: 4
             engine:
               durations:
                 step: 1000
@@ -46,7 +51,7 @@ graphs:
                 activate: true
                 good: b
                 bad: v
-              sessions: 10
+              sessions: 30
               max_step: 15
       - id: sub
         module: timeflux.nodes.zmq
@@ -62,7 +67,7 @@ graphs:
         module: timeflux_dsp.nodes.filters
         class: IIRFilter
         params:
-          frequencies: [1, 40]
+          frequencies: [0.1, 40]
     edges:
       - source: engine:events
         target: pub
