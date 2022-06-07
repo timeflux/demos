@@ -8,4 +8,4 @@ The application is already implemented for two eeg headsets:
 - the unicorn by G.TEC through Brainflow
     - just launch the application using timeflux : timeflux unicorn.yaml
 
-See [GUI](../../tree/main/implicit/frustration/gui) for application details.
+See [GUI](gui) for application details.
