@@ -10,7 +10,7 @@ Currently, you can find:
 - a 4-class "[Rock, Paper, Scissors & Rest](../../tree/main/roshambo/)" classification engine using EMG signals ;
 - a [cardiac coherence](../../tree/main/coherence/) biofeedback application.
 - a simple neurofeedback application based on [frequency bands](../../tree/main/neurofeedback/bands/).
-- a [implicit frustration](../../tree/main/implicit/frustration) application with classification scripts.
+- a [implicit frustration](implicit/frustration) application with classification scripts.
 
 More demos will be added soon.
 Have fun!
