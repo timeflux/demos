@@ -372,13 +372,21 @@ class Grid {
     });
   }
 
+  /**
+   * Get cell column and cell row from cell id
+   * @param {number} cell_id
+   * @returns {list} - [<cell column>, <cell row>]
+   */
   _cell_pos(cell_id) {
     return [
       ~~(cell_id / this.options.parameters.rows),
       cell_id % this.options.parameters.rows,
     ];
   }
-
+  /**
+   *
+   * @returns {boolean} true if it's the end of the grid
+   */
   is_end() {
     if (this.cursor == this.target) {
       return true;
@@ -387,6 +395,10 @@ class Grid {
     }
   }
 
+  /**
+   *
+   * @returns {boolean} true if the cursor is closer to the target than before
+   */
   is_closer_to_target() {
     var cursor_dist = Math.sqrt(
       Math.pow(this.cursor.y - this.target.y, 2) +
@@ -402,6 +414,10 @@ class Grid {
     else return false;
   }
 
+  /**
+   *
+   * @returns {number} angle of movement of the cursor in relation to the target
+   */
   cursor_target_dir() {
     var base_vec = [
       this.prev_cursor.x - this.target.x,
