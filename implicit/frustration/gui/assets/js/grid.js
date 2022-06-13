@@ -200,6 +200,7 @@ class Grid {
     this.draw.text(this.options.rules.text, this.options.colors.text);
     this.grid_size =
       this.options.parameters.canvas_size * this.options.parameters.grid_tx;
+    this.prev_cursor;
   }
 
   /**
@@ -332,8 +333,8 @@ class Grid {
 
   _init_neighbors() {
     this.cells.forEach((cell) => {
-      let cell_c = ~~(cell.id / this.options.parameters.rows);
-      let cell_r = cell.id % this.options.parameters.rows;
+      let cell_c, cell_r;
+      [cell_c, cell_r] = this._cell_pos(cell.id);
 
       let cell_neighbors = [];
       for (
@@ -371,16 +372,55 @@ class Grid {
     });
   }
 
-  /**
-   * Check if it's the end of the game for this Grid
-   * @returns {boolean} Return True if cursor == target
-   */
+  _cell_pos(cell_id) {
+    return [
+      ~~(cell_id / this.options.parameters.rows),
+      cell_id % this.options.parameters.rows,
+    ];
+  }
+
   is_end() {
     if (this.cursor == this.target) {
       return true;
     } else {
       return false;
     }
+  }
+
+  is_closer_to_target() {
+    var cursor_dist = Math.sqrt(
+      Math.pow(this.cursor.y - this.target.y, 2) +
+        Math.pow(this.cursor.x - this.target.x, 2)
+    );
+
+    var prev_cursor_dist = Math.sqrt(
+      Math.pow(this.prev_cursor.y - this.target.y, 2) +
+        Math.pow(this.prev_cursor.x - this.target.x, 2)
+    );
+
+    if (cursor_dist < prev_cursor_dist) return true;
+    else return false;
+  }
+
+  cursor_target_dir() {
+    var base_vec = [
+      this.prev_cursor.x - this.target.x,
+      this.prev_cursor.y - this.target.y,
+    ];
+
+    var step_vec = [
+      this.prev_cursor.x - this.cursor.x,
+      this.prev_cursor.y - this.cursor.y,
+    ];
+
+    return Math.round(
+      Math.acos(
+        (base_vec[0] * step_vec[0] + base_vec[1] * step_vec[1]) /
+          (Math.sqrt(Math.pow(base_vec[0], 2) + Math.pow(base_vec[1], 2)) *
+            Math.sqrt(Math.pow(step_vec[0], 2) + Math.pow(step_vec[1], 2)))
+      ) *
+        (180 / Math.PI)
+    );
   }
 
   /**
@@ -400,6 +440,7 @@ class Grid {
    * Moves the cursor in a random step
    */
   random_step() {
+    this.prev_cursor = this.cursor;
     var neighbors_copy = this.cursor.neighbors.filter(Boolean);
     this.cursor.switch_cursor();
     this.cursor = getRandom(neighbors_copy);
