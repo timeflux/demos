@@ -51,24 +51,16 @@ class Engine {
           columns: 4,
         },
         rules: {
-          //            text:  "Hello :),\n\
-          //During this experiment we will observe the implicit reaction of \n\
-          //your brain to events happening on a grid with randomly \n\
-          //moving pieces. \n\
-          //The reactions we are trying to observe are implicit, so they are \n\
-          //independent of your own will. \n\
-          //Each time the piece moves you must press green if you \n\
-          //consider the move to be good or red if it is bad. \n\",
-          text: "Bonjour,\n\
-        Au cours de cette expérience, nous allons observer la réaction \n\
-        implicite de votre cerveau à des évenements qui se produisent \n\
-        avec un pion qui se déplace aléatoirement sur une grille. \n\
-        Les réactions que nous essayons d'observer sont implicites, \n\
-        donc indépendantes de votre propre volonté. \n\
-        Entre chaque déplacement vous devez appuyer sur le boutton \n\
-        vert si vous considérez que le pion se déplace dans la bonne \n\
-        direction ou sur le boutton rouge si vous considérez que le \n\
-        pions ne se déplace pas dans la bonne direction.",
+          text: "Hello,\n\
+        In this experiment, we will observe your brain's implicit \n\
+        response to events that occur with a cursor that moves \n\
+        randomly on a grid.\n\
+        The reactions we are trying to observe are implicit therefore \n\
+        independent of your own will. \n\
+        Between each move you must press the green button if you \n\
+        consider that the cursor is moving in the right direction or \n\
+        on the red button if you consider that the cursor is not moving \n\
+        in the right direction.",
         },
       },
       engine: {
@@ -155,11 +147,15 @@ class Engine {
           }
           await sleep(this.options.engine.durations.step);
         }
+
         await this.scheduler.asap(() => {
           this.grid.random_step();
+
           this.io.event("step", {
-            win: this.grid.is_end(),
             cursor: this.grid.cursor.id,
+            angle: this.grid.cursor_target_dir(),
+            closer: this.grid.is_closer_to_target(),
+            win: this.grid.is_end(),
           });
         });
 
