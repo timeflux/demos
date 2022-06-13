@@ -57,7 +57,6 @@ class Draw {
    * @param {boolean} fill
    */
   circle(x, y, r, color, fill = false) {
-    console.log(color);
     this.ctx.beginPath();
     this.ctx.arc(x, y, r, 0, 2 * Math.PI);
     if (fill) {
