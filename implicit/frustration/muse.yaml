@@ -22,7 +22,9 @@ graphs:
           topic: eeg
       - id: reindex
         module: timeflux.nodes.dejitter
-        class:  Reindex
+        class: Reindex
+        params:
+          rate: 256
     edges:
       - source: eeg
         target: reindex
@@ -92,18 +94,11 @@ graphs:
         class: Save
         params:
           path: data
-          #filename: 'test_001.hdf5'
           complevel: 0
           min_itemsize: 200
       - id: debug
         module: timeflux.nodes.debug
         class: Display
-      - id: gate
-        module: timeflux.nodes.gate
-        class: Gate
-        params:
-          event_opens: start
-          event_closes: end
     edges:
       - source: sub:*
         target: save
