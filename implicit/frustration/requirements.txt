@@ -1,0 +1,6 @@
+pylsl>=1.15.0
+muselsl>=2.2.0
+timeflux>=0.10.2
+timeflux_ui>=0.4.0
+timeflux_dsp>=0.3.1
+pyriemann>=0.2.7
