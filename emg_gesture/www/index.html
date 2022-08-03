@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EMG</title>
+    <h1 class="title is-centered">Gestures (EMG) — Bitalino </h1>
+    <script defer src="/common/assets/js/timeflux.js"></script>
+    <script defer src="assets/gauge.min.js"></script>
+    <script defer src="assets/roshambo.js"></script>
+    <script defer src="assets/app.js"></script>
+    <link rel="stylesheet" href="/common/assets/css/bulma.min.css">
+    <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<section class="table-section">
+    <h2 class="title">Features table</h2>
+    <div class="wrapper">
+        <table id="featuree-table" class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+            <th>Channel</th>
+            <th>Muscle</th>
+            <th>Activation</th>
+            </thead>
+            <tbody>
+            <tr>
+                <td>A1</td>
+                <td>Flexor</td>
+                <td id="A1"></td>
+            </tr>
+            <tr>
+                <td>A2</td>
+                <td>Abductor</td>
+                <td id="A2"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+<section class="table-section">
+    <h2 class="title">Burst gauge</h2>
+    <div id="gauge-container">
+        <canvas id="gauge_canvas"></canvas>
+    </div>
+</section>
+<section class="game-section">
+    <h2 class="title">Rock, Paper, Scissor</h2>
+    <button class="button" id="calibrate">Calibrate</button>
+    <button class="button" id="start" disabled>Start</button>
+
+    <div class="choices">
+        <div class="cross" id="fixation_cross">
+            +
+        </div>
+        <div class="choice" id="question">
+            <img src="assets/images/question.png" alt="">
+        </div>
+        <div class="choice" id="rest">
+            <img src="assets/images/rest.png" alt="">
+        </div>
+        <div class="choice" id="rock">
+            <img src="assets/images/rock.png" alt="">
+        </div>
+        <div class="choice" id="paper">
+            <img src="assets/images/paper.png" alt="">
+        </div>
+        <div class="choice" id="scissors">
+            <img src="assets/images/scissors.png" alt="">
+        </div>
+    </div>
+</section>
+</body>
+</html>

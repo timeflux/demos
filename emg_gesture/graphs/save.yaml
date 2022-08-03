@@ -1,0 +1,29 @@
+graphs:
+  - id: save
+    nodes:
+      - id: sub
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [bitalino, emg, events]
+      - id: save
+        module: timeflux.nodes.hdf5
+        class: Save
+        params:
+          min_itemsize: 1000
+    edges:
+      - source: sub:bitalino
+        target: save:bitalino # will be saved in hdf( key '/bitalino'
+
+      - source: sub:emg_filtered
+        target: save:emg_filtered # will be stored in hdf( key '/emg/filtered'
+
+      - source: sub:emg_burst
+        target: save:emg_burst  # will be stored in hdf( key '/emg/burst'
+
+      - source: sub:emg_features
+        target: save:emg_features  # will be stored in hdf( key '/emg/features'
+
+      - source: sub:events
+        target: save:events # will be stored in hdf( key '/events'
+    rate: 1 # save stuff once per second

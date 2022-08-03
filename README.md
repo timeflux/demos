@@ -7,6 +7,7 @@ Currently, you can find:
 - a [hyperscanning](../../tree/main/hyperscanning/) demos using Jinja and environment variables for customization ;
 - a fully-configurable [oddball protocol](../../tree/main/oddball) with visual, auditory and haptic support ;
 - a simple neurofeedback application based on [frequency bands](../../tree/main/neurofeedback/bands/).
+- a 4 classes "Rock, Paper, Scissors & Rest" classification based on [emg signal](../../tree/main/emg_gesture/).
 
 More demos will be added soon.
 Have fun!

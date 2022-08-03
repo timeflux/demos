@@ -1,0 +1,223 @@
+#"""Pipeline processings:
+
+#"""
+
+graphs:
+  - id: emg_biomarkers
+    nodes:
+      # Subscribe to signals
+      # --------------------
+      - id: sub  # /!\ make sure you have a Broker amongst your graphs!  /!\
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [bitalino, events]
+
+      # Select channel with eeg sensor
+      # ------------------------------
+      - id: select
+        module: timeflux.nodes.query
+        class: LocQuery
+        params:
+          key: [A1, A2]
+
+      # Define apps for feedback
+      # -----------------------
+      - id: ui
+        module: timeflux_ui.nodes.ui
+        class: UI
+        params:
+          routes:
+            emg_gesture: www  # now open http://localhost:8000/emg_gesture/
+          settings:
+            roshambo:
+              fixation_duration: 1000
+              trial_duration: 4000
+              calibration_rounds: 2
+
+      # Clean signal
+      # -------------
+      - id: bandpass
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+          filter_type: bandpass
+          frequencies: [10, 300]
+          order: 2
+
+      - id: mask_saturation
+        module: nodes.filters
+        class:  DropOutsider
+        params:
+          left: -1.5
+          right: 1.5
+
+      # Detect burst using TKEO
+      # -----------------------
+      - id: tkeo
+        module: nodes.emg
+        class:  TKEO
+
+      - id: smooth
+        module: nodes.filters
+        class:  MovingAverage
+        params:
+          length: .5  #.1
+          step: 0.
+
+      - id: scale
+        module: nodes.filters
+        class: RecursiveScaler
+        params:
+          method: minmax
+          limits: [.1, 2]
+
+      # KNN on temporal features
+      # -------------------------
+      - id: temporal_features
+        module: nodes.emg
+        class: TemporalFeatures
+
+      - id: epoch
+        module: timeflux.nodes.epoch
+        class: Epoch
+        params:
+          before: 0.0
+          after: 3.0
+          event_trigger: trial_starts
+
+      - id: fit_predict
+        module: timeflux.nodes.ml
+        class: Pipeline
+        params:
+          mode: predict
+          event_start_accumulation:  calibration_starts
+          event_stop_accumulation: calibration_stops
+          event_start_training: calibration_stops
+          meta_label: [epoch, context, id]
+          steps:
+            - module: timeflux.estimators.transformers.shape
+              class: Reduce
+              args:
+                axis: 1
+            - module: sklearn.preprocessing
+              class: Normalizer
+              args:
+                norm: max
+            - module: sklearn.neighbors
+              class: KNeighborsClassifier
+
+      # Drop Meta from a stream to ensure it can be serialized in UI websocket (TODO: https://github.com/timeflux/timeflux/issues/74)
+      # ----------------------------------------------------------------------
+      - id: drop_meta
+        module: nodes.drop_meta
+        class:  DropMeta
+
+      # Eventually, publish some streams to save them
+      # ---------------------------------------------
+      - id: pub_filtered
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: emg_filtered
+      - id: pub_energy
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: emg_energy
+      - id: pub_burst
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: emg_burst
+
+      - id: pub_features
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: emg_features
+      - id: pub_predictions
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: events
+      - id: pub_events
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: events
+      # for debug purpose
+      # ------------------
+      - id: display
+        module: timeflux.nodes.debug
+        class: Display
+      - id: display2
+        module: timeflux.nodes.debug
+        class: Display
+        params:
+          meta: true
+
+    edges:
+      - source: sub:bitalino
+        target: select
+      - source: select
+        target: mask_saturation
+      - source: mask_saturation
+        target: bandpass
+
+      # Detect burst using TKEO
+      # -----------------------
+      - source: bandpass
+        target: tkeo
+      - source: tkeo
+        target: smooth
+      - source: smooth
+        target: scale
+
+      # KNN on temporal features
+      # -------------------------
+      - source: select
+        target: epoch
+      - source: ui:events    # ui:events
+        target: epoch:events
+      - source: epoch:*
+        target: temporal_features
+      - source: ui:events
+        target: fit_predict:events
+      - source: temporal_features:*
+        target: fit_predict:training
+      - source: temporal_features:*
+        target: fit_predict
+      - source: fit_predict:events
+        target: pub_predictions
+
+      # UI
+      # ----
+      - source: sub:events
+        target: drop_meta
+      - source: drop_meta
+        target: ui:events
+      - source: select
+        target: ui:emg_raw
+      - source: scale
+        target: ui:emg_burst
+
+      # Publish to save
+      # ---------------
+      - source: ui:events
+        target: pub_events
+      - source: scale
+        target: pub_burst
+      - source: temporal_features
+        target: pub_features
+      - source: bandpass
+        target: pub_filtered
+
+      # for debug purpose 
+      # -----------------
+      - source: temporal_features:0
+        target: display2
+      - source: ui:events
+        target: display
+
+    rate: 0
