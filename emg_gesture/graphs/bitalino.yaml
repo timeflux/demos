@@ -1,0 +1,22 @@
+graphs:
+
+  - id: acquisition
+    nodes:
+    - id: bitalino
+      module: timeflux_bitalino.nodes.driver
+      class: Bitalino
+      params:
+        port: /dev/tty.BITalino-02-44
+        rate: 1000
+        sensors:
+          A1: EMG
+          A2: EMG
+    - id: publish
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: bitalino
+    edges:
+    - source: bitalino
+      target: publish
+    rate: 0

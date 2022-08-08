@@ -6,24 +6,26 @@ graphs:
         class: Sub
         params:
           topics: [bitalino, emg, events]
+          #topics: [bitalino, emg_filtered] #, emg_burst, emg_features, events]
       - id: save
         module: timeflux.nodes.hdf5
         class: Save
         params:
           min_itemsize: 1000
+      - id: display
+        module: timeflux.nodes.debug
+        class: Display
     edges:
+      # - source: sub:emg_filtered
+      #   target: display
       - source: sub:bitalino
-        target: save:bitalino # will be saved in hdf( key '/bitalino'
-
+        target: save:emg_raw # will be saved in hdf (key '/emg/raw')
       - source: sub:emg_filtered
-        target: save:emg_filtered # will be stored in hdf( key '/emg/filtered'
-
+        target: save:emg_filtered # will be stored in hdf (key '/emg/filtered')
       - source: sub:emg_burst
-        target: save:emg_burst  # will be stored in hdf( key '/emg/burst'
-
+        target: save:emg_burst  # will be stored in hdf (key '/emg/burst')
       - source: sub:emg_features
-        target: save:emg_features  # will be stored in hdf( key '/emg/features'
-
+        target: save:emg_features  # will be stored in hdf (key '/emg/features')
       - source: sub:events
-        target: save:events # will be stored in hdf( key '/events'
-    rate: 1 # save stuff once per second
+        target: save:events # will be stored in hdf (key '/events')
+    rate: 1 # update file once per second

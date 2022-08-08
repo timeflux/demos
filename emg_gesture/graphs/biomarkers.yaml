@@ -1,7 +1,3 @@
-#"""Pipeline processings:
-
-#"""
-
 graphs:
   - id: emg_biomarkers
     nodes:
@@ -13,13 +9,13 @@ graphs:
         params:
           topics: [bitalino, events]
 
-      # Select channel with eeg sensor
-      # ------------------------------
+      # Select EMG channels
+      # -------------------
       - id: select
         module: timeflux.nodes.query
         class: LocQuery
         params:
-          key: [A1, A2]
+          key: [A1_EMG, A2_EMG]
 
       # Define apps for feedback
       # -----------------------
@@ -33,7 +29,7 @@ graphs:
             roshambo:
               fixation_duration: 1000
               trial_duration: 4000
-              calibration_rounds: 2
+              calibration_rounds: 5
 
       # Clean signal
       # -------------
@@ -115,27 +111,31 @@ graphs:
 
       # Eventually, publish some streams to save them
       # ---------------------------------------------
-      - id: pub_filtered
+      - id: pub_emg
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: emg_filtered
-      - id: pub_energy
-        module: timeflux.nodes.zmq
-        class: Pub
-        params:
-          topic: emg_energy
-      - id: pub_burst
-        module: timeflux.nodes.zmq
-        class: Pub
-        params:
-          topic: emg_burst
-
-      - id: pub_features
-        module: timeflux.nodes.zmq
-        class: Pub
-        params:
-          topic: emg_features
+          topic: emg
+      # - id: pub_filtered
+      #   module: timeflux.nodes.zmq
+      #   class: Pub
+      #   params:
+      #     topic: emg_filtered
+      # - id: pub_energy
+      #   module: timeflux.nodes.zmq
+      #   class: Pub
+      #   params:
+      #     topic: emg_energy
+      # - id: pub_burst
+      #   module: timeflux.nodes.zmq
+      #   class: Pub
+      #   params:
+      #     topic: emg_burst
+      # - id: pub_features
+      #   module: timeflux.nodes.zmq
+      #   class: Pub
+      #   params:
+      #     topic: emg_features
       - id: pub_predictions
         module: timeflux.nodes.zmq
         class: Pub
@@ -197,7 +197,7 @@ graphs:
         target: drop_meta
       - source: drop_meta
         target: ui:events
-      - source: select
+      - source: bandpass
         target: ui:emg_raw
       - source: scale
         target: ui:emg_burst
@@ -207,11 +207,14 @@ graphs:
       - source: ui:events
         target: pub_events
       - source: scale
-        target: pub_burst
+        # target: pub_burst
+        target: pub_emg:burst
       - source: temporal_features
-        target: pub_features
+        # target: pub_features
+        target: pub_emg:features
       - source: bandpass
-        target: pub_filtered
+        # target: pub_filtered
+        target: pub_emg:filtered
 
       # for debug purpose 
       # -----------------
