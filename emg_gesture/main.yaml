@@ -3,7 +3,7 @@ import:
   - graphs/bitalino.yaml # comment this line to run on replayed data
   #- graphs/replay.yaml # comment this line to run with bitalino device
   - graphs/biomarkers.yaml
-  #- graphs/save.yaml
+  - graphs/save.yaml
 
 graphs:
 

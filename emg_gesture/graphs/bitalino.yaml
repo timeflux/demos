@@ -16,7 +16,12 @@ graphs:
       class: Pub
       params:
         topic: bitalino
+    # - id: display
+    #   module: timeflux.nodes.debug
+    #   class: Display
     edges:
     - source: bitalino
       target: publish
+    # - source: bitalino
+    #   target: display
     rate: 0

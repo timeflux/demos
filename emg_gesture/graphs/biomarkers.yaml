@@ -109,43 +109,34 @@ graphs:
         module: nodes.drop_meta
         class:  DropMeta
 
-      # Eventually, publish some streams to save them
+      # Finally, publish some streams to save them
       # ---------------------------------------------
-      - id: pub_emg
+      - id: pub_filtered
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: emg
-      # - id: pub_filtered
-      #   module: timeflux.nodes.zmq
-      #   class: Pub
-      #   params:
-      #     topic: emg_filtered
-      # - id: pub_energy
-      #   module: timeflux.nodes.zmq
-      #   class: Pub
-      #   params:
-      #     topic: emg_energy
-      # - id: pub_burst
-      #   module: timeflux.nodes.zmq
-      #   class: Pub
-      #   params:
-      #     topic: emg_burst
-      # - id: pub_features
-      #   module: timeflux.nodes.zmq
-      #   class: Pub
-      #   params:
-      #     topic: emg_features
-      - id: pub_predictions
+          topic: filtered
+      - id: pub_energy
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: events
+          topic: energy
+      - id: pub_burst
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: burst
+      - id: pub_features
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: features
       - id: pub_events
         module: timeflux.nodes.zmq
         class: Pub
         params:
           topic: events
+
       # for debug purpose
       # ------------------
       - id: display
@@ -161,8 +152,8 @@ graphs:
       - source: sub:bitalino
         target: select
       - source: select
-        target: mask_saturation
-      - source: mask_saturation
+      #   target: mask_saturation
+      # - source: mask_saturation
         target: bandpass
 
       # Detect burst using TKEO
@@ -189,7 +180,7 @@ graphs:
       - source: temporal_features:*
         target: fit_predict
       - source: fit_predict:events
-        target: pub_predictions
+        target: pub_events
 
       # UI
       # ----
@@ -207,14 +198,11 @@ graphs:
       - source: ui:events
         target: pub_events
       - source: scale
-        # target: pub_burst
-        target: pub_emg:burst
+        target: pub_burst
       - source: temporal_features
-        # target: pub_features
-        target: pub_emg:features
+        target: pub_features
       - source: bandpass
-        # target: pub_filtered
-        target: pub_emg:filtered
+        target: pub_filtered
 
       # for debug purpose 
       # -----------------
