@@ -7,15 +7,8 @@ graphs:
         module: timeflux.nodes.zmq
         class: Sub
         params:
-          topics: [bitalino, events]
+          topics: [emg, events]
 
-      # Select EMG channels
-      # -------------------
-      - id: select
-        module: timeflux.nodes.query
-        class: LocQuery
-        params:
-          key: [A1_EMG, A2_EMG]
 
       # Define apps for feedback
       # -----------------------
@@ -24,12 +17,12 @@ graphs:
         class: UI
         params:
           routes:
-            emg_gesture: www  # now open http://localhost:8000/emg_gesture/
+            roshambo: www  # now open http://localhost:8000/roshambo/
           settings:
             roshambo:
               fixation_duration: 1000
               trial_duration: 4000
-              calibration_rounds: 5
+              calibration_rounds: 2
 
       # Clean signal
       # -------------
@@ -116,11 +109,7 @@ graphs:
         class: Pub
         params:
           topic: filtered
-      - id: pub_energy
-        module: timeflux.nodes.zmq
-        class: Pub
-        params:
-          topic: energy
+
       - id: pub_burst
         module: timeflux.nodes.zmq
         class: Pub
@@ -149,11 +138,9 @@ graphs:
           meta: true
 
     edges:
-      - source: sub:bitalino
-        target: select
-      - source: select
-      #   target: mask_saturation
-      # - source: mask_saturation
+      - source: sub:emg
+        target: mask_saturation
+      - source: mask_saturation
         target: bandpass
 
       # Detect burst using TKEO
@@ -167,7 +154,7 @@ graphs:
 
       # KNN on temporal features
       # -------------------------
-      - source: select
+      - source: sub:emg
         target: epoch
       - source: ui:events    # ui:events
         target: epoch:events

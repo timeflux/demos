@@ -2,6 +2,9 @@ graphs:
 
   - id: acquisition
     nodes:
+
+    # Bitalino driver
+    # -------------------
     - id: bitalino
       module: timeflux_bitalino.nodes.driver
       class: Bitalino
@@ -11,17 +14,31 @@ graphs:
         sensors:
           A1: EMG
           A2: EMG
+
+    # Select EMG channels
+    # -------------------
+    - id: select
+      module: timeflux.nodes.query
+      class: LocQuery
+      params:
+        key: [A1_EMG, A2_EMG]
+    # Publish 
+    # -------
     - id: publish
       module: timeflux.nodes.zmq
       class: Pub
       params:
-        topic: bitalino
+        topic: emg
+  
     # - id: display
     #   module: timeflux.nodes.debug
     #   class: Display
     edges:
-    - source: bitalino
-      target: publish
+     - source: bitalino
+       target: select
+     - source: select
+       target: publish
+       
     # - source: bitalino
     #   target: display
     rate: 0

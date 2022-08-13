@@ -5,17 +5,18 @@ graphs:
         module: timeflux.nodes.zmq
         class: Sub
         params:
-          topics: [bitalino, filtered, burst, features, events]
+          topics: [emg, filtered, burst, features, events]
       - id: save
         module: timeflux.nodes.hdf5
         class: Save
         params:
           min_itemsize: 1000
+          path: "./roshambo/data"
       # - id: display
       #   module: timeflux.nodes.debug
       #   class: Display
     edges:
-      - source: sub:bitalino
+      - source: sub:emg
         target: save:emg_raw # will be saved in hdf (key '/emg/raw')
       - source: sub:filtered
         target: save:emg_filtered # will be stored in hdf (key '/emg/filtered')

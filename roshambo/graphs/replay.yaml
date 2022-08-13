@@ -1,36 +1,44 @@
 graphs:
   - id: replay
     nodes:
+      # Replay an HDF5
+      # ---------------
       - id: replay
         module: timeflux.nodes.hdf5
         class: Replay
         params:
           filename: data/bitalino_emg_A12.hdf5
           keys:
-            - /bitalino
+            - /emg/raw
           speed: 1
 
-      - id: convert
-        module: nodes.unit
-        class: ConvertUnit
+      # Select EMG channels
+      # -------------------
+      - id: select
+        module: timeflux.nodes.query
+        class: LocQuery
+        params:
+          key: [A1_EMG, A2_EMG]
 
+      # Publish 
+      # --------
       - id: pub # /!\ make sure you have a Broker amongst your graphs!  /!\
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: bitalino
+          topic: emg
 
-      # for debug purpose
+      # For debug purpose
       # ------------------
       - id: display
         module: timeflux.nodes.debug
         class: Display
 
     edges:
-      - source: replay:bitalino
-        target: convert
-      - source: convert
+      - source: replay:emg_raw
+        target: select
+      - source: select
         target: pub
-      # - source: convert
+      # - source: select
       #   target: display
     rate: 10  # this graph will refresh 10 times per second

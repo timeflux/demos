@@ -12,13 +12,11 @@ class MovingAverage(Slide):
 
     Args:
         length (float): The length of the window, in seconds.
-        closed (str): Output row with either fiirst (`left`), last (`right`) or middle (`center`) index
     """
 
-    def __init__(self, length, step, closed="right"):
+    def __init__(self, length, step):
 
         super(self.__class__, self).__init__(length=length, step=step)
-        self._closed = closed
         self._columns = None
 
     def update(self):
@@ -33,13 +31,7 @@ class MovingAverage(Slide):
 
         # if the window output is ready, fit the scaler with its values
         if self.o.ready():
-            if self._closed == "right":
-                closed_index = -1
-            elif self._closed == "left":
-                closed_index = 0
-            else:  # center
-                closed_index = len(self.i.data) // 2
-            time = self.i.data.index[closed_index]
+            time = self.i.data.index[-1]
             self.o.data = pd.DataFrame(
                 np.mean(self.o.data.values, axis=0).reshape(1, -1),
                 index=[time],
