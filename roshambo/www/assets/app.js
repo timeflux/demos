@@ -42,7 +42,7 @@ let io = new IO();
 io.on("connect", () => {
   console.log("connected");
   io.subscribe("events");
-  io.subscribe("emg_burst");
+  io.subscribe("burst");
 });
 
 // Load settings from UI timeflux graph
@@ -60,7 +60,7 @@ let gauge = new Gauge(geaugeElmt).setOptions(gaugeOptions);
 gauge.maxValue = 1;
 
 // Display the activation feature values in table
-io.on("emg_burst", (data) => {
+io.on("burst", (data) => {
   const row = data[Object.keys(data)[Object.keys(data).length - 1]]; // Last row
   tdElmts["A1_EMG"].innerHTML = (row["A1_EMG"] * 100).toFixed() + "%"; // update A1 cell content
   tdElmts["A2_EMG"].innerHTML = (row["A2_EMG"] * 100).toFixed() + "%"; // update A2 cell content

@@ -7,32 +7,41 @@ graphs:
         module: timeflux.nodes.zmq
         class: Sub
         params:
-          topics: [emg, events]
+          topics: [raw, events]
 
 
-      # Define apps for feedback
-      # -----------------------
-      - id: ui
-        module: timeflux_ui.nodes.ui
-        class: UI
-        params:
-          routes:
-            roshambo: www  # now open http://localhost:8000/roshambo/
-          settings:
-            roshambo:
-              fixation_duration: 1000
-              trial_duration: 4000
-              calibration_rounds: 2
+      # # Define apps for feedback
+      # # -----------------------
+      # - id: ui
+      #   module: timeflux_ui.nodes.ui
+      #   class: UI
+      #   params:
+      #     routes:
+      #       roshambo: www  # now open http://localhost:8000/roshambo/
+      #     settings:
+      #       roshambo:
+      #         fixation_duration: 1000
+      #         trial_duration: 4000
+      #         calibration_rounds: 2
 
       # Clean signal
       # -------------
+      - id: notch
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+          filter_type: bandstop
+          frequencies: [45, 55]
+          order: 1
+
       - id: bandpass
         module: timeflux_dsp.nodes.filters
         class: IIRFilter
         params:
           filter_type: bandpass
-          frequencies: [10, 300]
+          frequencies: [10, 200]
           order: 2
+
 
       - id: mask_saturation
         module: nodes.filters
@@ -96,14 +105,15 @@ graphs:
             - module: sklearn.neighbors
               class: KNeighborsClassifier
 
-      # Drop Meta from a stream to ensure it can be serialized in UI websocket (TODO: https://github.com/timeflux/timeflux/issues/74)
-      # ----------------------------------------------------------------------
-      - id: drop_meta
-        module: nodes.drop_meta
-        class:  DropMeta
 
       # Finally, publish some streams to save them
-      # ---------------------------------------------
+      # -------------------------------------------
+      - id: pub_events
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: events
+
       - id: pub_filtered
         module: timeflux.nodes.zmq
         class: Pub
@@ -115,37 +125,31 @@ graphs:
         class: Pub
         params:
           topic: burst
+
       - id: pub_features
         module: timeflux.nodes.zmq
         class: Pub
         params:
           topic: features
-      - id: pub_events
-        module: timeflux.nodes.zmq
-        class: Pub
-        params:
-          topic: events
 
       # for debug purpose
       # ------------------
       - id: display
         module: timeflux.nodes.debug
         class: Display
-      - id: display2
-        module: timeflux.nodes.debug
-        class: Display
-        params:
-          meta: true
+
 
     edges:
-      - source: sub:emg
-        target: mask_saturation
-      - source: mask_saturation
+      - source: sub:raw
+        target: notch
+      - source: notch
         target: bandpass
+      - source: bandpass
+        target: mask_saturation
 
       # Detect burst using TKEO
       # -----------------------
-      - source: bandpass
+      - source: mask_saturation
         target: tkeo
       - source: tkeo
         target: smooth
@@ -154,13 +158,13 @@ graphs:
 
       # KNN on temporal features
       # -------------------------
-      - source: sub:emg
+      - source: mask_saturation
         target: epoch
-      - source: ui:events    # ui:events
+      - source: sub:events   
         target: epoch:events
       - source: epoch:*
         target: temporal_features
-      - source: ui:events
+      - source: sub:events
         target: fit_predict:events
       - source: temporal_features:*
         target: fit_predict:training
@@ -171,31 +175,24 @@ graphs:
 
       # UI
       # ----
-      - source: sub:events
-        target: drop_meta
-      - source: drop_meta
-        target: ui:events
-      - source: bandpass
-        target: ui:emg_raw
-      - source: scale
-        target: ui:emg_burst
+      # - source: sub:events
+      #   target: drop_meta
+      # - source: drop_meta
+      #   target: ui:events
 
-      # Publish to save
-      # ---------------
-      - source: ui:events
-        target: pub_events
+
+      # Publish
+      # --------
       - source: scale
         target: pub_burst
       - source: temporal_features
         target: pub_features
-      - source: bandpass
+      - source: mask_saturation
         target: pub_filtered
 
       # for debug purpose 
       # -----------------
       - source: temporal_features:0
-        target: display2
-      - source: ui:events
         target: display
 
     rate: 0
