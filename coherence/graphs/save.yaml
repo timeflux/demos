@@ -1,0 +1,26 @@
+graphs:
+  - id: save
+    nodes:
+      - id: sub
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [bitalino, cardiac, events]
+      - id: save
+        module: timeflux.nodes.hdf5
+        class: Save
+        params:
+          min_itemsize: 1000
+    edges:
+      - source: sub:bitalino
+        target: save:bitalino # will be saved in hdf( key '/bitalino'
+
+      - source: sub:cardiac_features
+        target: save:cardiac_features  # will be saved in hdf( key '/ecg_cardiac/features'
+
+      - source: sub:cardiac_rr
+        target: save:cardiac_rr  # will be saved in hdf( key '/ecg_cardiac/rr'
+
+      - source: sub:events
+        target: save:events # will be saved in hdf( key '/events'
+    rate: 1 # save stuff once per second

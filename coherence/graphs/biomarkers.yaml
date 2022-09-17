@@ -1,0 +1,184 @@
+graphs:
+
+  - id: cardiac_biomarkers
+    nodes:
+      # Subscribe to signals
+      # --------------------
+      - id: sub  # /!\ make sure you have a Broker amongst your graphs!  /!\
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [bitalino, events]
+
+      # Convert to physical unit
+      # -------------------------
+      - id: convert
+        module: modules.nodes.conversion
+        class: ConvertUnit
+
+      # Select channel with eeg sensor
+      # ------------------------------
+      - id: select
+        module: timeflux.nodes.query
+        class: LocQuery
+        params:
+          key: [A1]
+
+      # Define apps for feedback
+      # -----------------------
+      - id: ui
+        module: timeflux_ui.nodes.ui
+        class: UI
+        params:
+          routes:
+            ecg_cardiac: apps/ecg_cardiac  # now open http://localhost:8000/ecg_cardiac/
+          settings:
+            circle:
+              transition:
+                color: .5s
+                size: .5s
+
+      # Clean signal
+      # -------------
+      - id: notch
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+          filter_type: bandstop
+          frequencies: [45, 55]
+          order: 1
+
+      - id: bandpass
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+          filter_type: bandpass
+          frequencies: [2, 40]
+          order: 2
+
+      # Extract ecg_cardiac beats
+      # ---------------------
+      - id: scale_signal
+        module: timeflux_dsp.nodes.filters
+        class:  AdaptiveScaler
+        params:
+          length: 5
+          method: sklearn.preprocessing.MinMaxScaler
+
+      - id: peaks
+        module: timeflux_dsp.nodes.peaks
+        class: LocalDetect
+        params:
+          delta: .5
+          tol: .5
+
+      - id: rr_interval
+        module: modules.nodes.events
+        class: ToSignal
+        params:
+          labels: peak
+          meta_keys: interval
+
+      - id: window
+        module: modules.nodes.window
+        class: FixedWindow
+        params:
+          length: 32
+          step: 1
+
+      - id: welch
+        module: timeflux_dsp.nodes.spectral
+        class: Welch
+        params:
+          rate: 1  # todo: interpolate signal before to have uniform sampling!
+          closed: center
+          nperseg: 8
+          noverlap: 7
+
+      - id: bands
+        module: timeflux_dsp.nodes.spectral
+        class: Bands
+        params:
+          bands:
+            lf: [0.04, 0.15]
+            hf: [0.15, 0.4]
+          relative: true
+
+      - id: features
+        module: modules.nodes.biosignal.cardiac
+        class: CardiacFreqMarkers
+
+      - id: scale_rr
+        module: timeflux_dsp.nodes.filters
+        class:  AdaptiveScaler
+        params:
+          length: 30
+          method: sklearn.preprocessing.MinMaxScaler  # todo: make it more robust to outliers
+
+      # Eventually, publish some streams to save them
+      # ---------------------------------------------
+      - id: pub_rr
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: cardiac_rr
+
+      - id: pub_features
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: cardiac_features
+
+      # for debug purpose
+      # ------------------
+      - id: display
+        module: timeflux.nodes.debug
+        class: Display
+
+    edges:
+      - source: sub:bitalino
+        target: convert
+      - source: convert
+        target: select
+      - source: select
+
+        target: notch
+      - source: notch
+        target: bandpass
+      - source: bandpass
+        target: scale_signal
+      - source: scale_signal
+        target: peaks
+      - source: peaks
+        target: rr_interval
+
+      - source: rr_interval
+        target: window
+      - source: window
+        target: welch
+      - source: welch
+        target: bands
+      - source: bands:*
+        target: features
+
+      - source: rr_interval
+        target: pub_rr
+      - source: features
+        target: pub_features
+
+      - source: features
+        target: ui:cardiac_features
+      - source: rr_interval
+        target: scale_rr
+      - source: scale_rr
+        target: ui:scaled_rr
+      - source: rr_interval
+        target: ui:rr
+      - source: select
+        target: ui:ecg_raw
+      - source: bandpass
+        target: ui:ecg_filtered
+
+      - source: scale_rr
+        target: display
+    rate: 0
