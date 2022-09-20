@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script defer src="/common/assets/js/timeflux.js"></script>
+    <script defer src="assets/app.js"></script>
+    <link rel="stylesheet" href="/common/assets/css/bulma.min.css">
+    <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<section class="section">
+    <h1 class="title">Cardiac coherence (ECG) </h1>
+    <h2 class="title">Features table</h2>
+    <div class="wrapper">
+        <table id="values_table" class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+            <th>Name</th>
+            <th>Value</th>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Heart rate</td>
+                <td id="bpm"></td>
+            </tr>
+            <tr>
+                <td> LF (sympathetic)</td>
+                <td id="lf"></td>
+            </tr>
+            <tr>
+                <td> HF (parasympathetic)</td>
+                <td id="hf"></td>
+            </tr>
+            <tr>
+                <td> LF/HF (coherence)</td>
+                <td id="lf/hf"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+<section class="section">
+    <h2 class="title">Biofeedback circle</h2>
+    <div class="container" id="circle-container">
+        <div id="circle"></div>
+    </div>
+</section>
+</body>
+</html>

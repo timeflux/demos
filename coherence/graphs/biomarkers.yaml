@@ -8,35 +8,7 @@ graphs:
         module: timeflux.nodes.zmq
         class: Sub
         params:
-          topics: [bitalino, events]
-
-      # Convert to physical unit
-      # -------------------------
-      - id: convert
-        module: modules.nodes.conversion
-        class: ConvertUnit
-
-      # Select channel with eeg sensor
-      # ------------------------------
-      - id: select
-        module: timeflux.nodes.query
-        class: LocQuery
-        params:
-          key: [A1]
-
-      # Define apps for feedback
-      # -----------------------
-      - id: ui
-        module: timeflux_ui.nodes.ui
-        class: UI
-        params:
-          routes:
-            ecg_cardiac: apps/ecg_cardiac  # now open http://localhost:8000/ecg_cardiac/
-          settings:
-            circle:
-              transition:
-                color: .5s
-                size: .5s
+          topics: [raw, events]
 
       # Clean signal
       # -------------
@@ -45,17 +17,18 @@ graphs:
         class: IIRFilter
         params:
           filter_type: bandstop
-          frequencies: [45, 55]
+          frequencies: [40, 60]
           order: 1
 
       - id: bandpass
         module: timeflux_dsp.nodes.filters
         class: IIRFilter
         params:
-          filter_type: bandpass
-          frequencies: [2, 40]
-          order: 2
+           frequencies: [1, 40]
+           order: 1
+           filter_type: bandpass
 
+ 
       # Extract ecg_cardiac beats
       # ---------------------
       - id: scale_signal
@@ -73,15 +46,15 @@ graphs:
           tol: .5
 
       - id: rr_interval
-        module: modules.nodes.events
-        class: ToSignal
+        module: nodes.events
+        class: EventToSignal
         params:
           labels: peak
           meta_keys: interval
 
       - id: window
-        module: modules.nodes.window
-        class: FixedWindow
+        module: timeflux.nodes.window
+        class: SampleWindow
         params:
           length: 32
           step: 1
@@ -105,7 +78,7 @@ graphs:
           relative: true
 
       - id: features
-        module: modules.nodes.biosignal.cardiac
+        module: nodes.cardiac
         class: CardiacFreqMarkers
 
       - id: scale_rr
@@ -117,17 +90,29 @@ graphs:
 
       # Eventually, publish some streams to save them
       # ---------------------------------------------
+      - id: pub_filtered
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: filtered
+
       - id: pub_rr
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: cardiac_rr
+          topic: rr
+
+      - id: pub_scaled_rr
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: scaled_rr
 
       - id: pub_features
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: cardiac_features
+          topic: features
 
       # for debug purpose
       # ------------------
@@ -136,22 +121,19 @@ graphs:
         class: Display
 
     edges:
-      - source: sub:bitalino
-        target: convert
-      - source: convert
-        target: select
-      - source: select
-
+      # Preprocessing
+      - source: sub:raw
         target: notch
       - source: notch
         target: bandpass
       - source: bandpass
         target: scale_signal
+
+      # Extract featuures 
       - source: scale_signal
         target: peaks
       - source: peaks
         target: rr_interval
-
       - source: rr_interval
         target: window
       - source: window
@@ -160,25 +142,20 @@ graphs:
         target: bands
       - source: bands:*
         target: features
-
+      - source: rr_interval
+        target: scale_rr
+      
+      # Publish 
+      - source: scale_rr
+        target: pub_scaled_rr
+      - source: scale_signal
+        target: pub_filtered
       - source: rr_interval
         target: pub_rr
       - source: features
         target: pub_features
-
-      - source: features
-        target: ui:cardiac_features
+      
+      # Display (debug)
       - source: rr_interval
-        target: scale_rr
-      - source: scale_rr
-        target: ui:scaled_rr
-      - source: rr_interval
-        target: ui:rr
-      - source: select
-        target: ui:ecg_raw
-      - source: bandpass
-        target: ui:ecg_filtered
-
-      - source: scale_rr
         target: display
-    rate: 0
+    rate: 10

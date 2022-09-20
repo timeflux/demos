@@ -1,6 +1,54 @@
 import:
-  - broker.yaml
-#  - graphs/bitalino.yaml # comment this line to run on replayed data
-  - graphs/replay.yaml # comment this line to run with bitalino device
+# input graphs (choose one amongst the three! )
+# ----------------------------
+  # - graphs/bitalino.yaml # uncomment this line to run with bitalino device
+  # - graphs/replay.yaml # uncomment this line to run on replayed data
+  - graphs/sinus.yaml # uncomment this line to run on a generated sinusoidal signal
+
+# graphs to extract biomarkers and save
   - graphs/biomarkers.yaml
-  - graphs/save.yaml
+  # - graphs/save.yaml # uncomment this line to save the data into Hdf5
+
+graphs:
+
+- id: broker
+  nodes:
+    - id: broker
+      module: timeflux.nodes.zmq
+      class: Broker
+
+- id: ui
+  nodes:       
+    # Subscribe to signals
+    # --------------------
+    - id: sub 
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics: [raw, filtered, features, rr, scaled_rr ]
+
+    # Define apps for feedback
+    # -----------------------
+    - id: ui
+      module: timeflux_ui.nodes.ui
+      class: UI
+      params:
+        routes:
+          coherence: www  # now open http://localhost:8000/coherence/
+        settings:
+          circle:
+            transition:
+              color: .5s
+              size: .5s
+  
+  edges:
+    - source: sub:raw
+      target: ui:raw
+    - source: sub:filtered
+      target: ui:filtered 
+    - source: sub:features
+      target: ui:cardiac_features
+    - source: sub:rr
+      target: ui:rr
+    - source: sub:scaled_rr
+      target: ui:radius

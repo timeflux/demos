@@ -1,0 +1,27 @@
+graphs:
+  - id: generate
+    nodes:
+      - id: sinus
+        module: timeflux_audio.nodes.signal
+        class: Sine
+        params:
+          frequency: 1
+          resolution: 500
+          amplitude: 1
+
+      # Publish 
+      # -------
+      - id: pub
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: raw
+
+      - id: display
+        module: timeflux.nodes.debug
+        class: Display
+    edges:
+     - source: sinus
+       target: pub
+       
+    rate: 10

@@ -7,14 +7,14 @@ graphs:
         params:
           filename: data/bitalino_ecg_A1.hdf5
           keys:
-            - /bitalino
+            - /raw
           speed: 1
 
       - id: pub # /!\ make sure you have a Broker amongst your graphs!  /!\
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: bitalino
+          topic: raw
 
       # for debug purpose
       # ------------------
@@ -23,7 +23,7 @@ graphs:
         class: Display
 
     edges:
-      - source: replay:bitalino
+      - source: replay:raw
         target: pub
 #      - source: replay:bitalino
 #        target: display

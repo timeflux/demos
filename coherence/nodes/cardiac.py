@@ -5,6 +5,11 @@ import pandas as pd
 
 class CardiacFreqMarkers(Node):
     """Cardiac marker based on frequency
+
+    Attributes:
+        i_lf (Port): Low Frequency power, expects DataFrame.
+        i_hf (Port): High Frequency power, expects DataFrame.
+        o (Port): Default output, provides DataFrame with column 'lf', 'hf', and 'lf/hf' and meta.
     """
 
     def update(self):
