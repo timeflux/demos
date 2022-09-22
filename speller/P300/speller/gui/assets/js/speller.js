@@ -446,6 +446,6 @@ function get_css_var(name) {
  * @param {string} text
  */
 function speak(text) {
-    let utterance = new SpeechSynthesisUtterance(text);
+    let utterance = new SpeechSynthesisUtterance(text.toLowerCase());
     speechSynthesis.speak(utterance);
 }
