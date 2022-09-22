@@ -20,7 +20,7 @@ graphs:
       module: timeflux.nodes.zmq
       class: Pub
       params:
-        topic: eeg
+        topic: filtered
     edges:
       - source: eeg
         target: pub_raw

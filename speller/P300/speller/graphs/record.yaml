@@ -6,7 +6,7 @@ graphs:
       module: timeflux.nodes.zmq
       class: Sub
       params:
-        topics: [events, raw]
+        topics: [events, raw, filtered]
     - id: save
       module: timeflux.nodes.hdf5
       class: Save
@@ -17,5 +17,7 @@ graphs:
       - source: subscribe:events
         target: save:events
       - source: subscribe:raw
-        target: save:eeg
+        target: save:raw
+      - source: subscribe:filtered
+        target: save:filtered
     rate: 1
