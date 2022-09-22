@@ -1,3 +1,9 @@
+import:
+  - graphs/random.yaml
+  #- graphs/lsl.yaml
+  #- graphs/cyton.yaml
+  - graphs/record.yaml
+
 graphs:
 
   - id: protocol
@@ -13,7 +19,7 @@ graphs:
           # Adjust if necessary
           oddball: ./www
         # The full list of options is available here:
-        # https://github.com/timeflux/demos/blob/master/oddball/oddball/assets/js/app.js#L18
+        # https://github.com/timeflux/demos/blob/main/oddball/oddball/www/assets/js/app.js#L26
         settings:
           oddball:
             photodiode:
@@ -27,34 +33,13 @@ graphs:
       module: timeflux.nodes.zmq
       class: Sub
       params:
-        topics: [ eeg ]
+        topics: [ filtered ]
     edges:
       - source: ui:events
         target: publish
-      - source: subscribe:eeg
+      - source: subscribe:filtered
         target: ui:eeg
     rate: 30
-
-  - id: eeg
-    nodes:
-    - id: data
-      # This assumes EEG data is received through a LSL stream
-      # Change this node as appropriate
-      module: timeflux.nodes.lsl
-      class: Receive
-      params:
-        prop: name
-        value: my_lsl_stream # Set the name of the LSL stream here
-        sync: local # Set to "local" if the LSL stream originates from the same computer, or "network" otherwise
-    - id: publish
-      module: timeflux.nodes.zmq
-      class: Pub
-      params:
-        topic: eeg
-    edges:
-      - source: data
-        target: publish
-    rate: 10
 
   # Uncomment this graph if you want to use a photodiode
   # We already validated that the events are synchronized with screen refresh, so this is not strictly required
@@ -92,27 +77,6 @@ graphs:
   #     - source: subscribe:events
   #       target: debug
   #   rate: 1
-
-  - id: recorder
-    nodes:
-    - id: subscribe
-      module: timeflux.nodes.zmq
-      class: Sub
-      params:
-        topics: [ events, eeg, photodiode ]
-    - id: save
-      module: timeflux.nodes.hdf5
-      class: Save
-      params:
-        path: ./data # The HDF5 file will be saved in this directory
-    edges:
-      - source: subscribe:events
-        target: save:events
-      - source: subscribe:eeg
-        target: save:eeg
-      - source: subscribe:photodiode
-        target: save:photodiode
-    rate: 1
 
   - id: broker
     nodes:
