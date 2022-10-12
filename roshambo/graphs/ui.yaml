@@ -22,7 +22,7 @@ graphs:
             roshambo:
               fixation_duration: 1000
               trial_duration: 4000
-              calibration_rounds: 2
+              calibration_rounds: 4
 
       - id: pub_events
         module: timeflux.nodes.zmq

@@ -126,17 +126,3 @@ class DropOutsider(Node):
             self.o.data = None
         else:
             self.o.data[_mask.values] = np.NaN
-
-
-class Norm(Node):
-    """Estimate norm with `linalg.norm`"""
-
-    def update(self):
-        if not self.i.ready():
-            return
-
-        signals = self.i.data
-        norm = np.linalg.norm(signals, ord=None)
-        self.o.data = pd.DataFrame(
-            np.atleast_2d(norm), columns=["norm"], index=signals.index[-1:]
-        )

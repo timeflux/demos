@@ -9,7 +9,7 @@ graphs:
         params:
           filename: data/bitalino_emg_A12.hdf5
           keys:
-            - /emg/raw
+            - /raw
           speed: 1
 
       # Select EMG channels
@@ -26,7 +26,7 @@ graphs:
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: emg
+          topic: raw
 
       # For debug purpose
       # ------------------
@@ -35,7 +35,7 @@ graphs:
         class: Display
 
     edges:
-      - source: replay:emg_raw
+      - source: replay:raw
         target: select
       - source: select
         target: pub

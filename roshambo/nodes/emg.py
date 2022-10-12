@@ -1,10 +1,16 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import linregress
+
 from timeflux.core.node import Node
 
 
-class TemporalFeatures(Node):
+class EMGFeatures(Node):
+    """Extract temporal features from EMG
+    Attributes:
+        i* (Ports): Iterates over all input ports.
+        o*(Port): As many output ports as input ports
+    """
     def update(self):
         outputs = {}
         for _, suffix, port in self.iterate("i*"):
@@ -17,7 +23,6 @@ class TemporalFeatures(Node):
                 list_features.append(
                     data.apply(self._zero_crossing_rate).add_suffix("_zcr")
                 )
-                list_features.append(data.abs().std().add_suffix("_astd"))
                 outputs["o" + suffix] = {
                     "meta": port.meta,
                     "data": pd.concat(list_features).to_frame(index).T,
@@ -33,10 +38,13 @@ class TemporalFeatures(Node):
 
 
 class TKEO(Node):
-    """
+    """TKEO : Teager–Kaiser energy operator
+    Known to increase the EMG onset detection
+    
+    Attributes:
+        i (Port): Default input, expects DataFrame.
+        o (Port): Default output, provides DataFrame and meta.
 
-    Notes:
-    ------
     """
 
     def __init__(self):
@@ -47,7 +55,6 @@ class TKEO(Node):
         if not self.i.ready():
             return
             
-        # Copy the metadata
         self.o.meta = self.i.meta 
 
         if self._columns is None:
@@ -65,9 +72,10 @@ class TKEO(Node):
 
 
 class DetectBurst(Node):
-    """
-    Notes:
-    ------
+    """Detect EMG activation  Burst
+    Attributes:
+        i (Port): Default input, expects DataFrame.
+        o (Port): Default output, provides DataFrame and meta.
     """
 
     def __init__(self, intensity):

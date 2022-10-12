@@ -9,21 +9,6 @@ graphs:
         params:
           topics: [raw, events]
 
-
-      # # Define apps for feedback
-      # # -----------------------
-      # - id: ui
-      #   module: timeflux_ui.nodes.ui
-      #   class: UI
-      #   params:
-      #     routes:
-      #       roshambo: www  # now open http://localhost:8000/roshambo/
-      #     settings:
-      #       roshambo:
-      #         fixation_duration: 1000
-      #         trial_duration: 4000
-      #         calibration_rounds: 2
-
       # Clean signal
       # -------------
       - id: notch
@@ -42,7 +27,6 @@ graphs:
           frequencies: [10, 200]
           order: 2
 
-
       - id: mask_saturation
         module: nodes.filters
         class:  DropOutsider
@@ -60,7 +44,7 @@ graphs:
         module: nodes.filters
         class:  MovingAverage
         params:
-          length: .5  #.1
+          length: .5 
           step: 0.
 
       - id: scale
@@ -72,9 +56,9 @@ graphs:
 
       # KNN on temporal features
       # -------------------------
-      - id: temporal_features
+      - id: emg_features
         module: nodes.emg
-        class: TemporalFeatures
+        class: EMGFeatures
 
       - id: epoch
         module: timeflux.nodes.epoch
@@ -141,15 +125,15 @@ graphs:
 
     edges:
       - source: sub:raw
+        target: mask_saturation
+      - source: mask_saturation
         target: notch
       - source: notch
         target: bandpass
-      - source: bandpass
-        target: mask_saturation
 
       # Detect burst using TKEO
       # -----------------------
-      - source: mask_saturation
+      - source: bandpass
         target: tkeo
       - source: tkeo
         target: smooth
@@ -158,41 +142,34 @@ graphs:
 
       # KNN on temporal features
       # -------------------------
-      - source: mask_saturation
+      - source: bandpass
         target: epoch
       - source: sub:events   
         target: epoch:events
       - source: epoch:*
-        target: temporal_features
+        target: emg_features
       - source: sub:events
         target: fit_predict:events
-      - source: temporal_features:*
+      - source: emg_features:*
         target: fit_predict:training
-      - source: temporal_features:*
+      - source: emg_features:*
         target: fit_predict
-      - source: fit_predict:events
-        target: pub_events
-
-      # UI
-      # ----
-      # - source: sub:events
-      #   target: drop_meta
-      # - source: drop_meta
-      #   target: ui:events
 
 
       # Publish
       # --------
+      - source: bandpass
+        target: pub_filtered
+      - source: fit_predict:events
+        target: pub_events
       - source: scale
         target: pub_burst
-      - source: temporal_features
+      - source: emg_features
         target: pub_features
-      - source: mask_saturation
-        target: pub_filtered
 
       # for debug purpose 
       # -----------------
-      - source: temporal_features:0
+      - source: emg_features:0
         target: display
 
     rate: 0
