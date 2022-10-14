@@ -6,37 +6,23 @@ graphs:
       module: timeflux.nodes.hdf5
       class: Replay
       params:
-        filename: data/bitalino_eeg_A1.hdf5
+        filename: data/bitalino_eeg.hdf5
         keys:
-          - /bitalino
+          - /raw
         speed: 1
     - id: select
       module: timeflux.nodes.query
       class: LocQuery
       params:
-        key: [ A1 ]
-    - id: rename
-      module: timeflux.nodes.axis
-      class: RenameColumns
-      params:
-        names: [ Fpz ]
-    - id: convert
-      module: nodes.unit
-      class: ConvertUnit
-      params:
-        unit: uV
+        key: [ Fpz ]
     - id: pub
       module: timeflux.nodes.zmq
       class: Pub
       params:
         topic: raw
     edges:
-    - source: replay:bitalino
+    - source: replay:raw
       target: select
     - source: select
-      target: rename
-    - source: rename
-      target: convert
-    - source: convert
       target: pub
     rate: 10
