@@ -1,0 +1,27 @@
+graphs:
+  - id: save
+    nodes:
+      - id: sub
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [raw, filtered, bands]
+      - id: save
+        module: timeflux.nodes.hdf5
+        class: Save
+        params:
+          min_itemsize: 1000
+          path: "neurofeedback/bands/data"
+      # - id: display
+      #   module: timeflux.nodes.debug
+      #   class: Display
+    edges:
+      - source: sub:raw
+        target: save:raw # will be saved in hdf (key '/raw')
+      - source: sub:filtered
+        target: save:filtered # will be stored in hdf (key '/filtered')
+      - source: sub:bands
+        target: save:bands  # will be stored in hdf (key '/bands')
+      # - source: sub:filtered
+      #   target: display
+    rate: 1 # update file once per second
