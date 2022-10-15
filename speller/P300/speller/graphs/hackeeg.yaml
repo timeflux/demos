@@ -1,12 +1,12 @@
 graphs:
 
-  - id: HackEEG
+  - id: EEG
     nodes:
     - id: acquire
       module: timeflux_hackeeg.nodes.driver
       class: HackEEG
       params:
-        port: /dev/cu.usbmodem14401
+        port: /dev/cu.usbmodem14601
         rate: 250
         gain: 1
         names: [Cz, Pz, P7, P8, P3, P4, O1, O2]
@@ -21,7 +21,7 @@ graphs:
       params:
         rate: 250
         order: 3
-        frequencies: [1, 40]
+        frequencies: [.1, 24]
     - id: pub_raw
       module: timeflux.nodes.zmq
       class: Pub
@@ -31,13 +31,13 @@ graphs:
       module: timeflux.nodes.zmq
       class: Pub
       params:
-        topic: eeg
+        topic: filtered
     edges:
     - source: acquire
       target: pub_raw
     - source: acquire
-      target: notch
-    - source: notch
+      # target: notch
+    # - source: notch
       target: bandpass
     - source: bandpass
       target: pub_filtered

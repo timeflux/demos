@@ -40,7 +40,7 @@ graphs:
       module: timeflux.nodes.zmq
       class: Sub
       params:
-        topics: [model, eeg]
+        topics: [model, filtered]
     - id: pub
       module: timeflux.nodes.zmq
       class: Pub
@@ -51,7 +51,7 @@ graphs:
       target: pub
     - source: sub:model
       target: speller:model
-    - source: sub:eeg
+    - source: sub:filtered
       target: speller:eeg
     rate: 10
 
@@ -61,7 +61,7 @@ graphs:
       module: timeflux.nodes.zmq
       class: Sub
       params:
-        topics: [eeg, events]
+        topics: [filtered, events]
     - id: epoch
       module: timeflux.nodes.epoch
       class: Epoch
@@ -103,8 +103,8 @@ graphs:
     #   module: nodes.predict
     #   class: ASAP
     # - id: predict
-    #  module: nodes.predict
-    #  class: Direct
+    #   module: nodes.predict
+    #   class: Direct
     - id: pub
       module: timeflux.nodes.zmq
       class: Pub
@@ -114,7 +114,7 @@ graphs:
     #   module: timeflux.nodes.debug
     #   class: Display
     edges:
-    - source: sub:eeg
+    - source: sub:filtered
       target: epoch
     - source: sub:events
       target: epoch:events

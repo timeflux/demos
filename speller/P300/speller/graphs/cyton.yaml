@@ -1,4 +1,4 @@
-graphs:
+git staytugraphs:
 
   - id: OpenBCI
     nodes:
@@ -8,20 +8,22 @@ graphs:
       params:
         board: cyton
         serial_port: /dev/cu.usbserial-DQ0084BO
-        channels: [ Fpz, AF7, AF8, Oz, O1, O2, P7, P8 ]
+        channels: [Cz, Pz, P7, P8, P3, P4, O1, O2]
         debug: false
     - id: notch
       module: timeflux_dsp.nodes.filters
-      class: IIRLineFilter
+      class: IIRFilter
       params:
-        rate: 250
+        filter_type: bandstop
+        frequencies: [45, 55]
+        order: 1
     - id: bandpass
       module: timeflux_dsp.nodes.filters
       class: IIRFilter
       params:
-        rate: 250
-        order: 3
+        filter_type: bandpass
         frequencies: [1, 40]
+        order: 2
     - id: pub_raw
       module: timeflux.nodes.zmq
       class: Pub
@@ -31,7 +33,7 @@ graphs:
       module: timeflux.nodes.zmq
       class: Pub
       params:
-        topic: eeg
+        topic: filtered
     edges:
     - source: acquire
       target: pub_raw

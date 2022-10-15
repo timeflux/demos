@@ -1,0 +1,30 @@
+graphs:
+  - id: generate
+    nodes:
+    - id: sinus
+      module: timeflux_audio.nodes.signal
+      class: Additive
+      params: 
+        frequencies: [1, 5, 10,  18, 30, 50] # center of delta, theta, alpha, beta, gamma bands and line noise 
+        resolution: 500
+        amplitudes:  [1, .5, .25,  .12, .06, 0.2] # Amplitudes of bands and line noise 
+        name: Fpz
+
+    # Publish 
+    # -------
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+
+    - id: display
+      module: timeflux.nodes.debug
+      class: Display
+    edges:
+     - source: sinus
+       target: pub
+    #  - source: sinus
+    #    target: display
+       
+    rate: 10

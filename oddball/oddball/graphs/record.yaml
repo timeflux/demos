@@ -1,0 +1,24 @@
+graphs:
+
+  - id: Recorder
+    nodes:
+    - id: subscribe
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics: [ events, raw, filtered, photodiode ]
+    - id: save
+      module: timeflux.nodes.hdf5
+      class: Save
+      params:
+        path: ./data # The HDF5 file will be saved in this directory
+    edges:
+      - source: subscribe:events
+        target: save:events
+      - source: subscribe:raw
+        target: save:raw
+      - source: subscribe:filtered
+        target: save:filtered
+      - source: subscribe:photodiode
+        target: save:photodiode
+    rate: 1

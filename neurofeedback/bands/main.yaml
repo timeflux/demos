@@ -1,7 +1,13 @@
 import:
-  #- graphs/synthetic.yaml
-  - graphs/replay.yaml
-  #- graphs/cyton.yaml
+# Input graphs 
+# -------------
+  # - graphs/bitalino.yaml # uncomment this line to use bitalino device
+  # - graphs/synthetic.yaml # uncomment this line to use brainflow device
+  # - graphs/cython.yaml # uncomment this line to use openBCI device
+  - graphs/replay.yaml #  uncomment this line to use replayed data 
+  # - graphs/sinus.yaml #  uncomment this line to use generated data 
+  
+  # - graphs/save.yaml # uncomment this graph to save the data in HDF5
 
 graphs:
 
@@ -73,8 +79,6 @@ graphs:
       - source: notch
         target: bandpass
       - source: bandpass
-        target: select
-      - source: select
         target: filter_bank
       - source: filter_bank
         target: band_powers

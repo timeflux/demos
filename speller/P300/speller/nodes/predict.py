@@ -199,7 +199,7 @@ class ASAP_DynamicStopping(Node):
 
                 # Match flashes and epochs, and update probabilities
                 elif row.label == "predict_proba":
-                    if self.ready and timestamp > self.time:
+                    if self.ready:
                         proba = json.loads(row["data"])["result"]
                         group = meta.pop(0)["epoch"]["context"]["group"]
                         self._update(proba, group)

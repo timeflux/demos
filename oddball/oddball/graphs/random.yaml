@@ -1,0 +1,29 @@
+graphs:
+
+  - id: EEG
+    nodes:
+    - id: eeg
+      module: timeflux.nodes.random
+      class: Random
+      params:
+        columns: 8
+        rows_min: 50
+        rows_max: 50
+        value_min: -10
+        value_max: 10
+    - id: pub_raw
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+    - id: pub_filtered
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: filtered
+    edges:
+      - source: eeg
+        target: pub_raw
+      - source: eeg
+        target: pub_filtered
+    rate: 10

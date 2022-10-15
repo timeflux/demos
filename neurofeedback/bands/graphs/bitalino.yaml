@@ -1,0 +1,51 @@
+graphs:
+
+  - id: acquisition
+    nodes:
+
+    # Bitalino driver
+    # -------------------
+    - id: bitalino
+      module: timeflux_bitalino.nodes.driver
+      class: Bitalino
+      params:
+        port: /dev/tty.BITalino-19-95-Bluetoot
+        rate: 1000
+        sensors:
+          A1: EEG
+
+    # Select EEG channel
+    # -------------------
+    - id: select
+      module: timeflux.nodes.query
+      class: LocQuery
+      params:
+        key: [A1_EEG]
+  
+    - id: rename
+      module: timeflux.nodes.axis
+      class: RenameColumns
+      params:
+        names: [ Fpz ]
+
+    # Publish 
+    # -------
+    - id: pub_raw
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+
+    - id: display
+      module: timeflux.nodes.debug
+      class: Display
+    edges:
+     - source: bitalino
+       target: select
+     - source: select 
+       target: rename
+     - source: rename
+       target: pub_raw
+    #  - source: rename
+    #    target: display
+    rate: 0

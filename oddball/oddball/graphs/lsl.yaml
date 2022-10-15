@@ -1,0 +1,22 @@
+graphs:
+
+  - id: LSL
+    nodes:
+    - id: data
+      # This assumes EEG data is received through a LSL stream
+      # Change this node as appropriate
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: name
+        value: my_lsl_stream # Set the name of the LSL stream here
+        sync: local # Set to "local" if the LSL stream originates from the same computer, or "network" otherwise
+    - id: publish
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+    edges:
+      - source: data
+        target: publish
+    rate: 10

@@ -1,0 +1,47 @@
+graphs:
+
+  - id: OpenBCI
+    nodes:
+    - id: acquire
+      module: timeflux_openbci.nodes.driver
+      class: OpenBCI
+      params:
+        board: cyton
+        serial_port: /dev/cu.usbserial-DQ0084BO
+        channels: [ Cz, Pz, P7, P8, P3, P4, O1, O2 ]
+        gain: 24
+        debug: true
+    - id: notch
+      module: timeflux_dsp.nodes.filters
+      class: IIRFilter
+      params:
+        filter_type: bandstop
+        frequencies: [45, 55]
+        order: 1
+    - id: bandpass
+      module: timeflux_dsp.nodes.filters
+      class: IIRFilter
+      params:
+        filter_type: bandpass
+        frequencies: [1, 40]
+        order: 2
+    - id: pub_raw
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+    - id: pub_filtered
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: filtered
+    edges:
+    - source: acquire
+      target: pub_raw
+    - source: acquire
+    #   target: notch
+    # - source: notch
+      target: bandpass
+    - source: bandpass
+      target: pub_filtered
+    rate: 10
