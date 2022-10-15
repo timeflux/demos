@@ -1,0 +1,28 @@
+graphs:
+  - id: save
+    nodes:
+      - id: sub
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [raw, filtered, features, rr ]
+      - id: save
+        module: timeflux.nodes.hdf5
+        class: Save
+        params:
+          path: data
+          min_itemsize: 1000
+    edges:
+      - source: sub:raw
+        target: save:raw # will be saved in hdf( key '/raw'
+
+      - source: sub:filtered
+        target: save:filtered # will be saved in hdf( key '/filtered'
+
+      - source: sub:rr
+        target: save:rr # will be saved in hdf( key '/rr'
+
+      - source: sub:features
+        target: save:features # will be saved in hdf( key '/features'
+        
+    rate: 1 # save stuff once per second

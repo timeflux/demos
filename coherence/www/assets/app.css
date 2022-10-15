@@ -1,0 +1,32 @@
+:root {
+  --circle-color: #cccccc;
+  --circle-width: 50%;
+  --circle-height: 50%;
+  --circle-opacity: 50%;
+  --size-transition: 0.5s;
+  --color-transition: 0.5s;
+}
+
+html,
+body,
+#container {
+  height: 100%;
+  padding: 0;
+}
+
+#circle-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 500pt; /* todo: unhardcode this height */
+}
+
+#circle {
+  background-color: var(--circle-color);
+  opacity: var(--circle-opacity);
+  width: var(--circle-width);
+  height: var(--circle-height);
+  border-radius: 50%;
+  transition: height var(--size-transition) ease,
+    width var(--size-transition) ease, color var(--color-transition) ease;
+}

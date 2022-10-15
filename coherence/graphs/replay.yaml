@@ -1,0 +1,30 @@
+graphs:
+  - id: replay
+    nodes:
+      - id: replay
+        module: timeflux.nodes.hdf5
+        class: Replay
+        params:
+          filename: data/bitalino_ecg_A1.hdf5
+          keys:
+            - /raw
+          speed: 1
+
+      - id: pub # /!\ make sure you have a Broker amongst your graphs!  /!\
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: raw
+
+      # for debug purpose
+      # ------------------
+      - id: display
+        module: timeflux.nodes.debug
+        class: Display
+
+    edges:
+      - source: replay:raw
+        target: pub
+#      - source: replay:bitalino
+#        target: display
+    rate: 10  # this graph will refresh 10 times per second

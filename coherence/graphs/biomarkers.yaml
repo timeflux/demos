@@ -1,0 +1,161 @@
+graphs:
+
+  - id: cardiac_biomarkers
+    nodes:
+      # Subscribe to signals
+      # --------------------
+      - id: sub  # /!\ make sure you have a Broker amongst your graphs!  /!\
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [raw, events]
+
+      # Clean signal
+      # -------------
+      - id: notch
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+          filter_type: bandstop
+          frequencies: [40, 60]
+          order: 1
+
+      - id: bandpass
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+           frequencies: [1, 40]
+           order: 1
+           filter_type: bandpass
+
+ 
+      # Extract ecg_cardiac beats
+      # ---------------------
+      - id: scale_signal
+        module: timeflux_dsp.nodes.filters
+        class:  AdaptiveScaler
+        params:
+          length: 5
+          method: sklearn.preprocessing.MinMaxScaler
+
+      - id: peaks
+        module: timeflux_dsp.nodes.peaks
+        class: LocalDetect
+        params:
+          delta: .5
+          tol: .5
+
+      - id: rr_interval
+        module: nodes.events
+        class: EventToSignal
+        params:
+          labels: peak
+          meta_keys: interval
+
+      - id: window
+        module: timeflux.nodes.window
+        class: SampleWindow
+        params:
+          length: 32
+          step: 1
+
+      - id: welch
+        module: timeflux_dsp.nodes.spectral
+        class: Welch
+        params:
+          rate: 1  # todo: interpolate signal before to have uniform sampling!
+          closed: center
+          nperseg: 8
+          noverlap: 7
+
+      - id: bands
+        module: timeflux_dsp.nodes.spectral
+        class: Bands
+        params:
+          bands:
+            lf: [0.04, 0.15]
+            hf: [0.15, 0.4]
+          relative: true
+
+      - id: features
+        module: nodes.cardiac
+        class: CardiacFreqMarkers
+
+      - id: scale_rr
+        module: timeflux_dsp.nodes.filters
+        class:  AdaptiveScaler
+        params:
+          length: 30
+          method: sklearn.preprocessing.MinMaxScaler  # todo: make it more robust to outliers
+
+      # Eventually, publish some streams to save them
+      # ---------------------------------------------
+      - id: pub_filtered
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: filtered
+
+      - id: pub_rr
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: rr
+
+      - id: pub_scaled_rr
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: scaled_rr
+
+      - id: pub_features
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: features
+
+      # for debug purpose
+      # ------------------
+      - id: display
+        module: timeflux.nodes.debug
+        class: Display
+
+    edges:
+      # Preprocessing
+      - source: sub:raw
+        target: notch
+      - source: notch
+        target: bandpass
+      - source: bandpass
+        target: scale_signal
+
+      # Extract featuures 
+      - source: scale_signal
+        target: peaks
+      - source: peaks
+        target: rr_interval
+      - source: rr_interval
+        target: window
+      - source: window
+        target: welch
+      - source: welch
+        target: bands
+      - source: bands:*
+        target: features
+      - source: rr_interval
+        target: scale_rr
+      
+      # Publish 
+      - source: scale_rr
+        target: pub_scaled_rr
+      - source: scale_signal
+        target: pub_filtered
+      - source: rr_interval
+        target: pub_rr
+      - source: features
+        target: pub_features
+      
+      # Display (debug)
+      - source: rr_interval
+        target: display
+    rate: 10
