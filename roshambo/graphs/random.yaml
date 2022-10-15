@@ -17,7 +17,7 @@ graphs:
         module: timeflux.nodes.zmq
         class: Pub
         params:
-          topic: emg
+          topic: raw
 
       # For debug purpose
       # ------------------
