@@ -1,0 +1,31 @@
+graphs:
+  - id: save
+    nodes:
+      - id: sub
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [raw, filtered, burst, features, events]
+      - id: save
+        module: timeflux.nodes.hdf5
+        class: Save
+        params:
+          min_itemsize: 1000
+          path: "./roshambo/data"
+      # - id: display
+      #   module: timeflux.nodes.debug
+      #   class: Display
+    edges:
+      - source: sub:raw
+        target: save:raw # will be saved in hdf (key '/raw')
+      - source: sub:filtered
+        target: save:filtered # will be stored in hdf (key '/filtered')
+      - source: sub:burst
+        target: save:burst  # will be stored in hdf (key '/burst')
+      - source: sub:features
+        target: save:features  # will be stored in hdf (key '/features')
+      - source: sub:events
+        target: save:events # will be stored in hdf (key '/events')
+      # - source: sub:filtered
+      #   target: display
+    rate: 1 # update file once per second

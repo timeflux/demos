@@ -1,0 +1,33 @@
+graphs:
+  - id: random
+    nodes:
+      # Generate random data
+      # --------------------
+      - id: random
+        module: timeflux.nodes.random
+        class: Signal
+        params:
+          names: [A1_EMG, A2_EMG]
+          rate: 1000
+          amplitude: .2
+          
+      # Publish 
+      # --------
+      - id: pub # /!\ make sure you have a Broker amongst your graphs!  /!\
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: emg
+
+      # For debug purpose
+      # ------------------
+      - id: display
+        module: timeflux.nodes.debug
+        class: Display
+
+    edges:
+      - source: random
+        target: pub
+      # - source: select
+      #   target: display
+    rate: 10  # this graph will refresh 10 times per second

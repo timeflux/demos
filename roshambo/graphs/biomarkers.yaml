@@ -1,0 +1,175 @@
+graphs:
+  - id: emg_biomarkers
+    nodes:
+      # Subscribe to signals
+      # --------------------
+      - id: sub  # /!\ make sure you have a Broker amongst your graphs!  /!\
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [raw, events]
+
+      # Clean signal
+      # -------------
+      - id: notch
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+          filter_type: bandstop
+          frequencies: [45, 55]
+          order: 1
+
+      - id: bandpass
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+          filter_type: bandpass
+          frequencies: [10, 200]
+          order: 2
+
+      - id: mask_saturation
+        module: nodes.filters
+        class:  DropOutsider
+        params:
+          left: -1.5
+          right: 1.5
+
+      # Detect burst using TKEO
+      # -----------------------
+      - id: tkeo
+        module: nodes.emg
+        class:  TKEO
+
+      - id: smooth
+        module: nodes.filters
+        class:  MovingAverage
+        params:
+          length: .5 
+          step: 0.
+
+      - id: scale
+        module: nodes.filters
+        class: RecursiveScaler
+        params:
+          method: minmax
+          limits: [.1, 2]
+
+      # KNN on temporal features
+      # -------------------------
+      - id: emg_features
+        module: nodes.emg
+        class: EMGFeatures
+
+      - id: epoch
+        module: timeflux.nodes.epoch
+        class: Epoch
+        params:
+          before: 0.0
+          after: 3.0
+          event_trigger: trial_starts
+
+      - id: fit_predict
+        module: timeflux.nodes.ml
+        class: Pipeline
+        params:
+          mode: predict
+          event_start_accumulation:  calibration_starts
+          event_stop_accumulation: calibration_stops
+          event_start_training: calibration_stops
+          meta_label: [epoch, context, id]
+          steps:
+            - module: timeflux.estimators.transformers.shape
+              class: Reduce
+              args:
+                axis: 1
+            - module: sklearn.preprocessing
+              class: Normalizer
+              args:
+                norm: max
+            - module: sklearn.neighbors
+              class: KNeighborsClassifier
+
+
+      # Finally, publish some streams to save them
+      # -------------------------------------------
+      - id: pub_events
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: events
+
+      - id: pub_filtered
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: filtered
+
+      - id: pub_burst
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: burst
+
+      - id: pub_features
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: features
+
+      # for debug purpose
+      # ------------------
+      - id: display
+        module: timeflux.nodes.debug
+        class: Display
+
+
+    edges:
+      - source: sub:raw
+        target: mask_saturation
+      - source: mask_saturation
+        target: notch
+      - source: notch
+        target: bandpass
+
+      # Detect burst using TKEO
+      # -----------------------
+      - source: bandpass
+        target: tkeo
+      - source: tkeo
+        target: smooth
+      - source: smooth
+        target: scale
+
+      # KNN on temporal features
+      # -------------------------
+      - source: bandpass
+        target: epoch
+      - source: sub:events   
+        target: epoch:events
+      - source: epoch:*
+        target: emg_features
+      - source: sub:events
+        target: fit_predict:events
+      - source: emg_features:*
+        target: fit_predict:training
+      - source: emg_features:*
+        target: fit_predict
+
+
+      # Publish
+      # --------
+      - source: bandpass
+        target: pub_filtered
+      - source: fit_predict:events
+        target: pub_events
+      - source: scale
+        target: pub_burst
+      - source: emg_features
+        target: pub_features
+
+      # for debug purpose 
+      # -----------------
+      - source: emg_features:0
+        target: display
+
+    rate: 0

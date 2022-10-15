@@ -1,0 +1,43 @@
+graphs:
+
+  - id: acquisition
+    nodes:
+
+    # Bitalino driver
+    # -------------------
+    - id: bitalino
+      module: timeflux_bitalino.nodes.driver
+      class: Bitalino
+      params:
+        port: /dev/tty.BITalino-19-95-Bluetoot
+        rate: 1000
+        sensors:
+          A1: EMG
+          A2: EMG
+
+    # Select EMG channels
+    # -------------------
+    - id: select
+      module: timeflux.nodes.query
+      class: LocQuery
+      params:
+        key: [A1_EMG, A2_EMG]
+    # Publish 
+    # -------
+    - id: pub_raw
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+
+    - id: display
+      module: timeflux.nodes.debug
+      class: Display
+    edges:
+     - source: bitalino
+       target: select
+     - source: select
+       target: pub_raw
+    #  - source: select
+    #    target: display
+    rate: 0
