@@ -56,9 +56,6 @@ graphs:
 
       # KNN on temporal features
       # -------------------------
-      - id: emg_features
-        module: nodes.emg
-        class: EMGFeatures
 
       - id: epoch
         module: timeflux.nodes.epoch
@@ -67,6 +64,21 @@ graphs:
           before: 0.0
           after: 3.0
           event_trigger: trial_starts
+
+      - id: window
+        module: timeflux.nodes.window
+        class: Slide
+        params:
+          length: 3.0
+          step: 0.2
+
+      - id: emg_features_epochs
+        module: nodes.emg
+        class: EMGFeatures
+
+      - id: emg_features_windows
+        module: nodes.emg
+        class: EMGFeatures
 
       - id: fit_predict
         module: timeflux.nodes.ml
@@ -147,12 +159,16 @@ graphs:
       - source: sub:events   
         target: epoch:events
       - source: epoch:*
-        target: emg_features
+        target: emg_features_epochs
+      - source: bandpass
+        target: window
+      - source: window:*
+        target: emg_features_windows
       - source: sub:events
         target: fit_predict:events
-      - source: emg_features:*
+      - source: emg_features_epochs:*
         target: fit_predict:training
-      - source: emg_features:*
+      - source: emg_features_windows:*
         target: fit_predict
 
 
@@ -164,12 +180,12 @@ graphs:
         target: pub_events
       - source: scale
         target: pub_burst
-      - source: emg_features
+      - source: emg_features_epochs
         target: pub_features
 
       # for debug purpose 
       # -----------------
-      - source: emg_features:0
+      - source: fit_predict:events
         target: display
 
     rate: 0

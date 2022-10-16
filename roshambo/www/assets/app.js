@@ -5,7 +5,7 @@ let options = {};
 
 // Prepare DOM elements
 const calibrateBtn = document.getElementById("calibrate");
-const startBtn = document.getElementById("start");
+//const startBtn = document.getElementById("start");
 const geaugeElmt = document.getElementById("gauge_canvas");
 const tdElmts = {
   A1_EMG: document.getElementById("A1_EMG"),
@@ -47,9 +47,9 @@ io.on("connect", () => {
 
 // Load settings from UI timeflux graph
 load_settings().then((settings) => {
-  options = settings.roshambo;
+  //options = settings.roshambo;
+  roshambo = new Roshambo(io, settings.roshambo);
   calibrateBtn.addEventListener("click", calibrate);
-  startBtn.addEventListener("click", classify);
 });
 
 // Sections: Table and Gauge
@@ -67,22 +67,23 @@ io.on("burst", (data) => {
   gauge.set((row["A1_EMG"] + row["A2_EMG"]) / 2); // update the gauge level
 });
 
+io.on("events", (data, meta) => {
+  for (let timestamp in data) {
+    try {
+      if (data[timestamp].label == "predict") {
+        let result = JSON.parse(data[timestamp].data).result;
+        roshambo.predict(result);
+      }
+    } catch (e) {}
+  }
+});
+
 // Roshambo game (Paper, Rock, Scissors)
 // -------------------------------------
 
 // Toggle Roshambo game
 const calibrate = async () => {
-  calibrateBtn.classList.toggle("disabled");
-  calibrateBtn.disabled = true;
-  roshambo = new Roshambo(io, options);
+  calibrateBtn.classList.add("hidden");
   await roshambo.calibrate();
-  calibrateBtn.disabled = false;
-  startBtn.disabled = false;
 };
 
-const classify = async () => {
-  roshambo._init();
-  //   start_button.classList.toggle('disabled');
-  await roshambo.classify();
-  startBtn.disabled = false;
-};

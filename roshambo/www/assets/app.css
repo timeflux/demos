@@ -1,10 +1,12 @@
-html, body, #container {
-    height: 100%;
-    padding: 0;
+h2 {
+    text-align: center;
+}
+
+.column {
+    text-align:center;
 }
 
 .choices {
-    margin: 50px 0;
     text-align: center;
 }
 
@@ -12,11 +14,9 @@ html, body, #container {
     border: 9px solid white;
     border-spacing: 10px;
     border-radius: 50%;
-    margin: 0 20px;
     display: none;
     transition: all 0.3s ease;
 }
-
 
 .cross {
     color: black;
@@ -29,7 +29,7 @@ html, body, #container {
 }
 
 .show {
-    display: inline-flex;
+    display: block;
 }
 
 .quiet {

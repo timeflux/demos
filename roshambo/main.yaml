@@ -2,9 +2,9 @@
 import:
 # Input graphs 
 # -------------
-  # - graphs/bitalino.yaml # comment this line to run on replayed data
-  # - graphs/random.yaml # uncomment this line to run with random data
-  - graphs/replay.yaml # comment this line to run with bitalino device
+  #- graphs/bitalino.yaml # comment this line to run on replayed data
+  - graphs/random.yaml # uncomment this line to run with random data
+  # - graphs/replay.yaml # comment this line to run with bitalino device
 
 # Biomarkers and UI
 # -----------------

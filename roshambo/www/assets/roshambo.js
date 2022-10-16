@@ -54,38 +54,13 @@ class Roshambo {
   }
 
   /**
-   * Prediction
+   * Show prediction
    */
-  async classify() {
-    this.io.event("classify_starts");
-    let meta = { id: null };
-    await sleep(this.options.fixation_duration);
-    this.io.event("trial_starts", meta);
-    // hide all choices
-    this._init();
-    // show image question
-    this._element_question.classList.toggle("show");
-
-    // Display prediction
-    this.io.on("events", (data, meta) => {
-      for (let timestamp in data) {
-        try {
-          if (data[timestamp]["label"] == "predict") {
-            data = JSON.parse(data[timestamp].data);
-            // hide question
-            this._init();
-            // display classification result
-            this._element_choices[data.result].classList.toggle("show");
-          }
-        } catch (e) {}
-      }
-    });
-
-    this.io.event("trial_stops", meta);
-
-    // this._element_question.classList.toggle('show');
-    // send event prediction stops
-    this.io.event("classify_stops");
+  predict(result) {
+    for (const [id, el] of Object.entries(this._element_choices)) {
+      el.classList.remove("show");
+    }
+    this._element_choices[result].classList.toggle("show");
   }
 
   /**
@@ -105,10 +80,4 @@ class Roshambo {
     }
   }
 
-  _init() {
-    const elements = document.getElementsByClassName("choice");
-    for (let i = 0; i < elements.length; i++) {
-      elements[i].classList.remove("show");
-    }
-  }
 }
