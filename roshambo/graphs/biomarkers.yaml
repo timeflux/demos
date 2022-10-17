@@ -72,14 +72,6 @@ graphs:
           length: 3.0
           step: 0.2
 
-      - id: emg_features_epochs
-        module: nodes.emg
-        class: EMGFeatures
-
-      - id: emg_features_windows
-        module: nodes.emg
-        class: EMGFeatures
-
       - id: fit_predict
         module: timeflux.nodes.ml
         class: Pipeline
@@ -90,10 +82,8 @@ graphs:
           event_start_training: calibration_stops
           meta_label: [epoch, context, id]
           steps:
-            - module: timeflux.estimators.transformers.shape
-              class: Reduce
-              args:
-                axis: 1
+            - module: estimators.emg
+              class: EMGFeatures
             - module: sklearn.preprocessing
               class: Normalizer
               args:
@@ -121,12 +111,6 @@ graphs:
         class: Pub
         params:
           topic: burst
-
-      - id: pub_features
-        module: timeflux.nodes.zmq
-        class: Pub
-        params:
-          topic: features
 
       # for debug purpose
       # ------------------
@@ -158,17 +142,13 @@ graphs:
         target: epoch
       - source: sub:events   
         target: epoch:events
-      - source: epoch:*
-        target: emg_features_epochs
       - source: bandpass
         target: window
-      - source: window:*
-        target: emg_features_windows
       - source: sub:events
         target: fit_predict:events
-      - source: emg_features_epochs:*
+      - source: epoch:*
         target: fit_predict:training
-      - source: emg_features_windows:*
+      - source: window:*
         target: fit_predict
 
 
@@ -180,8 +160,6 @@ graphs:
         target: pub_events
       - source: scale
         target: pub_burst
-      - source: emg_features_epochs
-        target: pub_features
 
       # for debug purpose 
       # -----------------
