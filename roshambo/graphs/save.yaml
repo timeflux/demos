@@ -11,7 +11,7 @@ graphs:
         class: Save
         params:
           min_itemsize: 1000
-          path: "./roshambo/data"
+          path: data
       # - id: display
       #   module: timeflux.nodes.debug
       #   class: Display
