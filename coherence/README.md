@@ -24,7 +24,7 @@ $ timeflux -d coherence/main.yaml
 
 Then, open <http://localhost:8000/coherence/>. 
 
-![demo-coherence-ecg](images/demo_coherence.gif)
+![demo-coherence-ecg](images/interface.gif)
 
 Feedback color scale: 
 
