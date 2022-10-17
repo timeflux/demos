@@ -62,8 +62,14 @@ graphs:
         class: Epoch
         params:
           before: 0.0
-          after: 3.0
+          after: 3.5
           event_trigger: trial_starts
+
+      - id: trim
+        module: timeflux.nodes.epoch
+        class: Trim
+        params:
+          samples: 3000
 
       - id: window
         module: timeflux.nodes.window
@@ -147,6 +153,8 @@ graphs:
       - source: sub:events
         target: fit_predict:events
       - source: epoch:*
+        target: trim
+      - source: trim:*
         target: fit_predict:training
       - source: window:*
         target: fit_predict
