@@ -14,7 +14,7 @@ Uncomment the `bitalino.yaml` graph in `main.yaml` file, and comment out the def
 
 You then need to plug the EEG sensor in input A1, and position the electrodes as follows:
 
-<img src="img/bitalino.jpg" width="20%">
+<img src="images/bitalino.jpg" width="20%">
 
 ## Running the demo
 
