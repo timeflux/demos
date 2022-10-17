@@ -1,41 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import linregress
-
 from timeflux.core.node import Node
-
-
-class EMGFeatures(Node):
-    """Extract temporal features from EMG
-    Attributes:
-        i* (Ports): Iterates over all input ports.
-        o*(Port): As many output ports as input ports
-    """
-    def update(self):
-        outputs = {}
-        for _, suffix, port in self.iterate("i*"):
-            if port.ready():
-                index = port.data.index.values[-1]
-                list_features = []
-                data = port.data
-                list_features.append(data.std().add_suffix("_std"))
-                list_features.append(data.max().add_suffix("_max"))
-                list_features.append(
-                    data.apply(self._zero_crossing_rate).add_suffix("_zcr")
-                )
-                outputs["o" + suffix] = {
-                    "meta": port.meta,
-                    "data": pd.concat(list_features).to_frame(index).T,
-                }
-        for port_name, port_data in outputs.items():
-            o = getattr(self, port_name)
-            o.data = port_data["data"]
-            o.meta = port_data["meta"]
-
-    @staticmethod
-    def _zero_crossing_rate(x):
-        return len(np.where(np.diff(np.sign(x)))[0]) / len(x)
-
 
 class TKEO(Node):
     """TKEO : Teager–Kaiser energy operator
