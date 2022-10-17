@@ -1,4 +1,4 @@
-# Frequency Bands (EEG)
+# Frequency Bands
 
 This demonstrates how one could implement a simple neurofeedback application.
 
@@ -6,7 +6,7 @@ This demonstrates how one could implement a simple neurofeedback application.
 
 ### With fake or replayed data (no device)
 
-You just need to comment the bitalino graph in main.yaml and instead uncomment the sinus graph (for sinusoidal input) or the replay graph (for replayed data).
+The default configuration uses real recorded data. You can also try sinusoidal waves by commenting out the `replay.yaml` graph in `main.yaml` and uncomment `sinus.yaml`.
 
 ### Using a BITalino device
 
@@ -14,7 +14,7 @@ Uncomment the `bitalino.yaml` graph in `main.yaml` file, and comment out the def
 
 You then need to plug the EEG sensor in input A1, and position the electrodes as follows:
 
- ![Application screenshot](images/bitalino.jpg | width=250)
+<img src="img/bitalino.jpg" width="20%">
 
 ## Running the demo
 
