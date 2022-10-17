@@ -1,16 +1,18 @@
 graphs:
+
   - id: emg_biomarkers
     nodes:
+
       # Subscribe to signals
       # --------------------
-      - id: sub  # /!\ make sure you have a Broker amongst your graphs!  /!\
+      - id: sub
         module: timeflux.nodes.zmq
         class: Sub
         params:
           topics: [raw, events]
 
       # Clean signal
-      # -------------
+      # ------------
       - id: notch
         module: timeflux_dsp.nodes.filters
         class: IIRFilter
@@ -55,7 +57,7 @@ graphs:
           limits: [.1, 2]
 
       # KNN on temporal features
-      # -------------------------
+      # ------------------------
 
       - id: epoch
         module: timeflux.nodes.epoch
@@ -69,6 +71,7 @@ graphs:
         module: timeflux.nodes.epoch
         class: Trim
         params:
+          # assumes 1000 Hz sample rate and trim to 3 seconds
           samples: 3000
 
       - id: window
@@ -99,7 +102,7 @@ graphs:
 
 
       # Finally, publish some streams to save them
-      # -------------------------------------------
+      # ------------------------------------------
       - id: pub_events
         module: timeflux.nodes.zmq
         class: Pub
@@ -119,7 +122,7 @@ graphs:
           topic: burst
 
       # for debug purpose
-      # ------------------
+      # -----------------
       - id: display
         module: timeflux.nodes.debug
         class: Display
@@ -143,7 +146,7 @@ graphs:
         target: scale
 
       # KNN on temporal features
-      # -------------------------
+      # ------------------------
       - source: bandpass
         target: epoch
       - source: sub:events   
@@ -161,7 +164,7 @@ graphs:
 
 
       # Publish
-      # --------
+      # -------
       - source: bandpass
         target: pub_filtered
       - source: fit_predict:events

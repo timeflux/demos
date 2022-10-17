@@ -11,10 +11,7 @@ graphs:
         class: Save
         params:
           min_itemsize: 1000
-          path: data
-      # - id: display
-      #   module: timeflux.nodes.debug
-      #   class: Display
+          path: ./data
     edges:
       - source: sub:raw
         target: save:raw # will be saved in hdf (key '/raw')

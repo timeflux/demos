@@ -1,6 +1,7 @@
 graphs:
   - id: random
     nodes:
+
       # Generate random data
       # --------------------
       - id: random
@@ -12,15 +13,15 @@ graphs:
           amplitude: .2
           
       # Publish 
-      # --------
-      - id: pub # /!\ make sure you have a Broker amongst your graphs!  /!\
+      # -------
+      - id: pub
         module: timeflux.nodes.zmq
         class: Pub
         params:
           topic: raw
 
       # For debug purpose
-      # ------------------
+      # -----------------
       - id: display
         module: timeflux.nodes.debug
         class: Display
@@ -30,4 +31,5 @@ graphs:
         target: pub
       # - source: select
       #   target: display
+
     rate: 10  # this graph will refresh 10 times per second

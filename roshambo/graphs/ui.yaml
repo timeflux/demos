@@ -1,9 +1,10 @@
 graphs:
   - id: ui
     nodes:
+
       # Subscribe to signals
       # --------------------
-      - id: sub  # /!\ make sure you have a Broker amongst your graphs!  /!\
+      - id: sub
         module: timeflux.nodes.zmq
         class: Sub
         params:
@@ -11,13 +12,13 @@ graphs:
 
 
       # Define apps for feedback
-      # -----------------------
+      # ------------------------
       - id: ui
         module: timeflux_ui.nodes.ui
         class: UI
         params:
           routes:
-            roshambo: www  # now open http://localhost:8000/roshambo/
+            roshambo: www # now open http://localhost:8000/roshambo/
           settings:
             roshambo:
               fixation_duration: 1000
@@ -30,7 +31,8 @@ graphs:
         params:
           topic: events
 
-      # Drop Meta from a stream to ensure it can be serialized in UI websocket (TODO: https://github.com/timeflux/timeflux/issues/74)
+      # Drop Meta from a stream to ensure it can be serialized in UI websocket
+      # (TODO: https://github.com/timeflux/timeflux/issues/74)
       # ----------------------------------------------------------------------
       - id: drop_meta
         module: nodes.drop_meta
@@ -41,9 +43,9 @@ graphs:
         class: Display
         params:
           meta: true
+
     edges:
-      # UI
-      # ----
+
       - source: sub:events
         target: drop_meta
       - source: drop_meta

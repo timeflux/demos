@@ -4,12 +4,12 @@ graphs:
     nodes:
 
     # Bitalino driver
-    # -------------------
+    # ---------------
     - id: bitalino
       module: timeflux_bitalino.nodes.driver
       class: Bitalino
       params:
-        port: /dev/tty.BITalino-19-95-Bluetoot
+        port: /dev/tty.BITalino-02-44
         rate: 1000
         sensors:
           A1: EMG
@@ -22,6 +22,7 @@ graphs:
       class: LocQuery
       params:
         key: [A1_EMG, A2_EMG]
+
     # Publish 
     # -------
     - id: pub_raw
@@ -33,6 +34,7 @@ graphs:
     - id: display
       module: timeflux.nodes.debug
       class: Display
+
     edges:
      - source: bitalino
        target: select
