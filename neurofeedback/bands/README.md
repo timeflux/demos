@@ -1,19 +1,27 @@
-# Frequency Bands (EEG) 
+# Frequency Bands (EEG)
+
 This demonstrates how one could implement a simple neurofeedback application.
 
-## Sensor montage
-### Using Bitalino
-You need to plug the EEG at inpuut A1 of Bitalino and place the electrode as follow: 
+## Setting up
 
- <img src="img/montage_bitalino.jpg" width="20%">
- 
+### With fake or replayed data (no device)
 
-## Demo 
+You just need to comment the bitalino graph in main.yaml and instead uncomment the sinus graph (for sinusoidal input) or the replay graph (for replayed data).
 
-Run the app:
+### Using a BITalino device
+
+Uncomment the `bitalino.yaml` graph in `main.yaml` file, and comment out the default `replay.yaml` graph.
+
+You then need to plug the EEG sensor in input A1, and position the electrodes as follows:
+
+ ![Application screenshot](images/bitalino.jpg | width=250)
+
+## Running the demo
+
+Launch the app:
 
 ```
-$ timeflux neurofeedback/bands/main.yaml -d 
+$ timeflux -d neurofeedback/bands/main.yaml
 ```
 
 Open a browser, and visualize:
@@ -22,11 +30,6 @@ Open a browser, and visualize:
 - [The relative and absolute frequency bands for the `Fpz` channel](http://localhost:8000/bands/)
 
 
-![demo-bands-eeg](img/demo_bands.gif)
-
-Image credits: https://thenounproject.com, Nick Taras.
-## With fake or replayed data (no device)
-You just need to comment the bitalino graph in main.yaml and instead uncomment the sinus graph (for sinusoidal input) or the replay graph (for replayed data).
-
+![demo-bands-eeg](images/interface.gif)
 
 
