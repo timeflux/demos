@@ -8,7 +8,7 @@ Currently, you can find:
 - a fully-configurable [oddball protocol](../../tree/main/oddball) with visual, auditory and haptic support ;
 - a simple neurofeedback application based on [frequency bands](../../tree/main/neurofeedback/bands/) ;
 - a 4-class "[Rock, Paper, Scissors & Rest](../../tree/main/roshambo/)" classification engine using EMG signals ;
-- a [cardiac coherence](../../tree/main/roshambo/) biofeedback application.
+- a [cardiac coherence](../../tree/main/coherence/) biofeedback application.
 
 More demos will be added soon.
 Have fun!
