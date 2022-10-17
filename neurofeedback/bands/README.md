@@ -4,7 +4,7 @@ This demonstrates how one could implement a simple neurofeedback application.
 
 ## Setting up
 
-### With fake or replayed data (no device)
+### With fake or recorded data (no device)
 
 The default configuration uses real recorded data. You can also try sinusoidal waves by commenting out the `replay.yaml` graph in `main.yaml` and uncomment `sinus.yaml`.
 
