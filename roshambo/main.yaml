@@ -1,13 +1,14 @@
 
 import:
-# Input graphs 
-# -------------
-  #- graphs/bitalino.yaml # comment this line to run on replayed data
+
+  # Input graphs
+  # ------------
   - graphs/random.yaml # uncomment this line to run with random data
   # - graphs/replay.yaml # comment this line to run with bitalino device
+  # - graphs/bitalino.yaml # comment this line to run on replayed data
 
-# Biomarkers and UI
-# -----------------
+  # Biomarkers and UI
+  # -----------------
   - graphs/biomarkers.yaml
   - graphs/ui.yaml
   # - graphs/save.yaml # un comment this graph to save the data in HDF5
