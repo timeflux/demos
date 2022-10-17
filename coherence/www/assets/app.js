@@ -10,16 +10,16 @@ columns.forEach(function (column) {
 });
 const td_bpm = document.getElementById("bpm");
 const _gradientColors = [
-  [0.0, 0.15, "#ff3030"], // No good
-  [0.15, 0.3, "#ff5d4b"],
-  [0.3, 0.45, "#ff8a4b"],
-  [0.45, 0.6, "#ffc04b"],
-  [0.6, 0.75, "#ffe74b"], // Getting closer
-  [0.75, 0.9, "#9aff26"], // Almost there
-  [0.9, 1.1, "#02ff8a"], // Coherence master
-  [1.1, 1.5, "#20ffff"], // Above Coherence master
-  [1.5, 2, "#14b5ff"], // this is color for Ghandi meditating
-  [2, 3, "#1173ff"], // this should never happen, but who knows if there's a god..
+  [0.0, 0.15, "#ff3030"], // no good
+  [0.15, 0.3, "#ff5d4b"], // still not there
+  [0.3, 0.45, "#ff8a4b"], // try to relax
+  [0.45, 0.6, "#ffc04b"], // calmer
+  [0.6, 0.75, "#ffe74b"], // getting closer
+  [0.75, 0.9, "#9aff26"], // almost there
+  [0.9, 1.1,  "#02ff8a"], // good
+  [1.1, 1.5,  "#20ffff"], // great
+  [1.5, 2,    "#14b5ff"], // coherence master
+  [2, 3,      "#1173ff"], // super-human
 ];
 let container = document.getElementById("circle-container");
 var max = 0;

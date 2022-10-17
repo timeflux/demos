@@ -1,13 +1,14 @@
 import:
-# input graphs (choose one amongst the three! )
-# ----------------------------
-  # - graphs/bitalino.yaml # uncomment this line to run with bitalino device
-  # - graphs/replay.yaml # uncomment this line to run on replayed data
-  - graphs/sinus.yaml # uncomment this line to run on a generated sinusoidal signal
 
-# graphs to extract biomarkers and save
+  # Input graphs (select one)
+  # -------------------------
+  - graphs/sinus.yaml # generated sinusoidal signal
+  # - graphs/bitalino.yaml # BITalino device
+  # - graphs/replay.yaml # pre-recorded data
+
+  # Extract biomarkers and record data
   - graphs/biomarkers.yaml
-  # - graphs/save.yaml # uncomment this line to save the data into Hdf5
+  # - graphs/save.yaml # save the data into Hdf5
 
 graphs:
 
@@ -18,17 +19,18 @@ graphs:
       class: Broker
 
 - id: ui
-  nodes:       
+  nodes:
+
     # Subscribe to signals
     # --------------------
-    - id: sub 
+    - id: sub
       module: timeflux.nodes.zmq
       class: Sub
       params:
         topics: [raw, filtered, features, rr, scaled_rr ]
 
     # Define apps for feedback
-    # -----------------------
+    # ------------------------
     - id: ui
       module: timeflux_ui.nodes.ui
       class: UI
@@ -40,12 +42,12 @@ graphs:
             transition:
               color: .5s
               size: .5s
-  
+
   edges:
     - source: sub:raw
       target: ui:raw
     - source: sub:filtered
-      target: ui:filtered 
+      target: ui:filtered
     - source: sub:features
       target: ui:cardiac_features
     - source: sub:rr
