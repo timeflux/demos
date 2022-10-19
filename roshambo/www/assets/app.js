@@ -5,7 +5,6 @@ let options = {};
 
 // Prepare DOM elements
 const calibrateBtn = document.getElementById("calibrate");
-//const startBtn = document.getElementById("start");
 const geaugeElmt = document.getElementById("gauge_canvas");
 const tdElmts = {
   A1_EMG: document.getElementById("A1_EMG"),
@@ -40,14 +39,12 @@ let io = new IO();
 
 // subscribe to useful streams on new connection
 io.on("connect", () => {
-  console.log("connected");
   io.subscribe("events");
   io.subscribe("burst");
 });
 
 // Load settings from UI timeflux graph
 load_settings().then((settings) => {
-  //options = settings.roshambo;
   roshambo = new Roshambo(io, settings.roshambo);
   calibrateBtn.addEventListener("click", calibrate);
 });
