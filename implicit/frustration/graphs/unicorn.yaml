@@ -1,0 +1,24 @@
+graphs:
+  - id: unicorn
+    nodes:
+      - id: eeg
+        module: timeflux_brainflow.nodes.driver
+        class: BrainFlow
+        params:
+          board: unicorn
+      - id: pub_eeg
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: eeg
+      - id: reindex
+        module: timeflux.nodes.dejitter
+        class: Reindex
+        params:
+          rate: 250
+    edges:
+      - source: eeg
+        target: reindex
+      - source: reindex
+        target: pub_eeg
+    rate: 5

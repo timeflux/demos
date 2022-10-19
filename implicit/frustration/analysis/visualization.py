@@ -8,9 +8,9 @@ import json
 import matplotlib.pyplot as plt
 
 fnames = [
-    "../exp_data/20220525-120400-S1-Acq2.hdf5",
-    "../exp_data/20220525-125204-S2-Acq2.hdf5",
+    "implicit/frustration/data/20220512-122156-S1-Acq1.hdf5",
 ]
+figure_folder = "implicit/frustration/analysis/figures"
 snames = ["S1", "S2"]
 
 tmin = -0.2
@@ -66,7 +66,7 @@ def plot_evoked_5_dir(epochs, suffix=""):
             title=f"{elec} - nave: {nave}",
             show=False,
         )
-        plt.savefig(f"{subject}-{elec}{suffix}.png")
+        plt.savefig(f"{figure_folder}/{subject}-{elec}{suffix}.png")
         plt.close()
     return epochs
 
@@ -101,7 +101,7 @@ def plot_evoked_3_dir(epochs, suffix="alt"):
             title=f"{elec} - nave: {nave}",
             show=False,
         )
-        plt.savefig(f"{subject}-{elec}-{suffix}.png")
+        plt.savefig(f"{figure_folder}/{subject}-{elec}-{suffix}.png")
         plt.close()
     return epochs
 
@@ -110,20 +110,17 @@ def plot_ep_img_3_dir(epochs):
     elecs = ["AF7", "AF8", "TP9", "TP10"]
     for evo in ["<60", "<120", "<180"]:
         fig = mne.viz.plot_epochs_image(epochs[evo], vmin=0, vmax=20, show=False)
-        fig[0].savefig(f"{subject}-{evo}-erp-gfp.png")
+        fig[0].savefig(f"{figure_folder}/{subject}-{evo}-erp-gfp.png")
         fig = mne.viz.plot_epochs_image(
             epochs[evo], vmin=-10, vmax=10, show=False, picks=elecs, combine=None
         )
         for e, f in zip(elecs, fig):
-            f.savefig(f"{subject}-{evo}-{e}-erp-.png")
+            f.savefig(f"{figure_folder}/{subject}-{evo}-{e}-erp-.png")
     plt.close("all")
 
 
 for fname, subject in zip(fnames, snames):
     store = pd.HDFStore(fname, "r")
-
-    # for key in store.keys():
-    #     print(key)
 
     events = store.select("events")
     steps = events.loc[(events["label"] == "step") | (events["label"] == "key")]
@@ -223,19 +220,3 @@ for fname, subject in zip(fnames, snames):
     ep_xd = xd.apply(epochs)
     _ = plot_evoked_3_dir(ep_xd["dirOk"], suffix="xdok")
     _ = plot_evoked_3_dir(ep_xd["dirNOk"], suffix="xdnok")
-
-    # epochs.pick_types(eeg=True)
-    # xd = mne.preprocessing.Xdawn(n_components=2, reg="ledoit_wolf")
-    # y = [1 if e == 20 else 0 for e in epochs["<60", "<120"].events[:, 2]]
-    # xd.fit(epochs["<60", "<120"], y)
-    # ep_xd = xd.apply(epochs)
-    # elecs = ["AF7", "AF8", "TP9", "TP10"]
-    # for evo in ["<60", "<120"]:
-    #     fig = mne.viz.plot_epochs_image(ep_xd[evo], vmin=0, vmax=20, show=False)
-    #     fig[0].savefig(f"{subject}-{evo}-xdawn-erp-gfp.png")
-    #     fig = mne.viz.plot_epochs_image(
-    #         epochs[evo], vmin=-10, vmax=10, show=False, picks=elecs, combine=None
-    #     )
-    #     for e, f in zip(elecs, fig):
-    #         f.savefig(f"{subject}-{evo}-xdawn-erp-{e}.png")
-    # plt.close("all")
