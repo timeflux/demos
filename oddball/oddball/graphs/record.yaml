@@ -11,6 +11,7 @@ graphs:
       module: timeflux.nodes.hdf5
       class: Save
       params:
+        min_itemsize: 512
         path: ./data # The HDF5 file will be saved in this directory
     edges:
       - source: subscribe:events
