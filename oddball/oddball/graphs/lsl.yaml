@@ -10,7 +10,6 @@ graphs:
       params:
         prop: name
         value: my_lsl_stream # Set the name of the LSL stream here
-        sync: local # Set to "local" if the LSL stream originates from the same computer, or "network" otherwise
     - id: bandpass
       module: timeflux_dsp.nodes.filters
       class: IIRFilter
