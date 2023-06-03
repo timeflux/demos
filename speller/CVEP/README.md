@@ -45,7 +45,7 @@ $ cd speller
 $ timeflux -d -E conf/myconf.cnf main.yaml
 ```
 
-The whole GUI runs in your web browser. You can monitor the EEG signal [here](http://localhost:8000/monitor) and access the main application [here](http://localhost:8000/speller). The speller early-stopping settings can be configured dynamically by pressing the `s` key.
+The whole GUI runs in your web browser. You can monitor the EEG signal [here](http://localhost:8000/monitor) and access the main application [here](http://localhost:8000/cvep). The speller early-stopping settings can be configured dynamically by pressing the `s` key.
 
 Raw and filtered EEG data, as well as events from the classifier and the GUI, are recorded in the `data` folder. Logs can be found in the `log` folder.
 
