@@ -1,0 +1,23 @@
+graphs:
+
+  - id: EEG
+    nodes:
+    - id: eeg
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: name
+        value: PiEEG
+        clocksync: true
+        dejitter: true
+        monotonize: true
+        channels: [ Cz, P3, Pz, P4, T5, O1, O2, T6 ]
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+    edges:
+      - source: eeg
+        target: pub
+    rate: 10

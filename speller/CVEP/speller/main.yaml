@@ -1,0 +1,120 @@
+import:
+  #- graphs/random.yaml
+  #- graphs/lsl_xon.yaml
+  #- graphs/lsl_pieeg.yaml
+  #- graphs/hackeeg.yaml
+  - graphs/{{ DEVICE }}.yaml
+  - graphs/classification.yaml
+  {% if RECORD == "true" %}
+  - graphs/record.yaml
+  {% endif %}
+
+graphs:
+
+  - id: Broker
+    nodes:
+    - id: proxy
+      module: timeflux.nodes.zmq
+      class: Broker
+
+  - id: Preprocessing
+    nodes:
+    - id: sub
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics: [raw]
+    - id: rereference
+      module: nodes.rereference
+      class: Mean
+    - id: notch
+      module: timeflux_dsp.nodes.filters
+      class: IIRFilter
+      params:
+        filter_type: bandstop
+        frequencies: [48, 52]
+        order: 3
+    - id: bandpass
+      module: timeflux_dsp.nodes.filters
+      class: IIRFilter
+      params:
+        filter_type: bandpass
+        frequencies: [1, 40]
+        order: 2
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: filtered
+    edges:
+      - source: sub:raw
+        target: rereference
+      - source: rereference
+        target: notch
+      - source: notch
+        target: bandpass
+      - source: bandpass
+        target: pub
+    rate: 10
+
+  - id: UI
+    nodes:
+    - id: speller
+      module: timeflux_ui.nodes.ui
+      class: UI
+      params:
+        # The application is available at http://localhost:8000/cvep/
+        routes:
+          cvep: gui
+        settings:
+          cvep:
+            pattern: "{{ PATTERN }}"
+            step: {{ STEP }}
+            training:
+              #targets: PKAMOFIHJDNGBECL
+              #targets: KKKKKEEEEE
+              #cycles: 1
+              #targets: 1
+              #cycles: 5
+              #targets: 8
+              #targets: PKAMOFIHJDNGBECL
+              cycles: {{ CYCLES }}
+              targets: {{ TARGETS }}
+    - id: sub
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics: [filtered, model]
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: events
+    edges:
+    - source: speller:events
+      target: pub
+    - source: sub:filtered
+      target: speller:eeg
+    - source: sub:model
+      target: speller:model
+    rate: 10
+
+  # - id: Display
+  #   nodes:
+  #   - id: sub
+  #     module: timeflux.nodes.zmq
+  #     class: Sub
+  #     params:
+  #       topics: [raw, events]
+  #   - id: display_eeg
+  #     module: timeflux.nodes.debug
+  #     class: Display
+  #   - id: display_events
+  #     module: timeflux.nodes.debug
+  #     class: Display
+  #   edges:
+  #   - source: sub:raw
+  #     target: display_eeg
+  #   - source: sub:events
+  #     target: display_events
+  #   rate: 10

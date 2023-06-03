@@ -1,0 +1,27 @@
+graphs:
+
+  - id: EEG
+    nodes:
+    - id: eeg
+      module: timeflux_hackeeg.nodes.driver
+      class: HackEEG
+      params:
+        port: /dev/cu.usbmodem1101
+        rate: 250
+        gain: 1
+        #names: [Cz, Pz, P7, P8, P3, P4, O1, O2] # Wet
+        names: [Cz, Pz, T5, P3, P4, T6, O1, O2] # Semi-dry
+    # - id: space
+    #   module: timeflux.nodes.dejitter
+    #   class: Space
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+    edges:
+    - source: eeg
+    #   target: space
+    # - source: space
+      target: pub
+    rate: 10

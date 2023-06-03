@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>cVEP Speller</title>
+    <link rel="stylesheet" href="assets/css/app.css">
+  </head>
+  <body>
+
+    <!-- Grid -->
+    <div id="wrapper">
+      <div id="main">
+        <div id="grid"></div>
+      </div>
+      <div id="footer">
+        <div id="instructions"></div>
+        <button id="button">Calibration</button>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div id="overlay" class="hidden">
+      <div id="settings">
+        <div>
+          <label for="threshold-slider">Threshold</label>
+          <input type="range" min="0.1" max="40" step="0.1" value="2" class="slider" id="threshold-slider">
+          <span class="value" id="threshold-value">3</span>
+        </div>
+        <div>
+          <label for="min_buffer_size-slider">Min buffer size</label>
+          <input type="range" min="1" max="500" step="1" value="10" class="slider" id="min_buffer_size-slider">
+          <span class="value" id="min_buffer_size-value">48</span>
+        </div>
+        <div>
+          <label for="max_buffer_size-slider">Max buffer size</label>
+          <input type="range" min="1" max="500" step="1" value="10" class="slider" id="max_buffer_size-slider">
+          <span class="value" id="max_buffer_size-value">48</span>
+        </div>
+        <div>
+          <label for="accumulation">Accumulation</label>
+          <select id="accumulation"><option value="mean">Mean</option><option value="bayesian">Bayesian</option></select>
+        </div>
+        <div>
+          <label for="scoring">Scoring</label>
+          <select id="scoring"><option value="ratio">Ratio</option><option value="highest">Highest</option><option value="iteration">Iteration</option></select>
+        </div>
+        <!--
+        <div>
+          <label for="feedback">Feedback</label>
+          <select id="feedback"><option value="1">Yes</option><option value="0">No</option></select>
+        </div>
+        -->
+      </div>
+    </div>
+
+    <script src="/common/assets/js/timeflux.js"></script>
+    <script src="assets/js/cvep.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>

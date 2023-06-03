@@ -1,0 +1,21 @@
+graphs:
+
+  - id: EEG
+    nodes:
+    - id: eeg
+      module: timeflux.nodes.random
+      class: Signal
+      params:
+        channels: 7
+        rate: 500
+        amplitude: 100
+        names: [ F3, F4, C3, Cz, C4, P3, P4 ]
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: raw
+    edges:
+      - source: eeg
+        target: pub
+    rate: 20

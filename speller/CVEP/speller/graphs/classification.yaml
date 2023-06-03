@@ -1,0 +1,86 @@
+graphs:
+
+- id: Classification
+  nodes:
+  - id: sub
+    module: timeflux.nodes.zmq
+    class: Sub
+    params:
+      topics: [ filtered, events ]
+  - id: epoch
+    module: timeflux.nodes.epoch
+    class: Samples
+    params:
+      trigger: sequence
+      length: {{ EPOCH_LENGTH }}
+  - id: classification
+    module: timeflux.nodes.ml
+    class: Pipeline
+    params:
+      mode: predict_proba
+      event_start_accumulation: training_begins
+      event_stop_accumulation: training_ends
+      event_start_training: training_ends
+      steps:
+        - module: timeflux.estimators.transformers.shape
+          class: Transpose
+          args:
+            axes: [ 0, 2, 1 ]
+        - module: estimators.cvep
+          class: CVEP_CCA
+          args:
+            n_classes: 16       # Number of classes
+            offset: {{ STEP }}  # Step for the shifted m-sequence
+  - id: shift
+    module: nodes.shift
+    class: Shift
+  - id: predict
+    module: nodes.predict
+    class: Accumulate
+    params:
+      accumulation: bayesian
+      scoring: ratio
+      threshold: 2
+      recovery:  500
+      min_buffer_size: 6
+      max_buffer_size: 64
+      feedback: false
+      source: cvep
+  - id: pub
+    module: timeflux.nodes.zmq
+    class: Pub
+    params:
+      topic: model
+  # - id: display
+  #   module: timeflux.nodes.debug
+  #   class: Display
+  #   params:
+  #     meta: true
+  # - id: latency
+  #   module: timeflux.nodes.debug
+  #   class: Latency
+  edges:
+    - source: sub:filtered
+      target: epoch
+    - source: sub:events
+      target: epoch:events
+    - source: sub:events
+      target: classification:events
+    - source: epoch:*
+      target: classification:training
+    - source: epoch:*
+      target: classification
+    - source: classification:events
+      target: shift
+    - source: shift
+      target: predict:model
+    - source: predict
+      target: pub
+    - source: sub:events
+      target: predict:reset
+    # - source: epoch
+    #   target: latency
+    #- source: classification:events
+    #  target: display
+  rate: 10
+

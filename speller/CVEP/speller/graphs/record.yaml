@@ -1,0 +1,23 @@
+graphs:
+
+  - id: Record
+    nodes:
+    - id: subscribe
+      module: timeflux.nodes.zmq
+      class: Sub
+      params:
+        topics: [events, raw, filtered]
+    - id: save
+      module: timeflux.nodes.hdf5
+      class: Save
+      params:
+        path: data
+        min_itemsize: 200
+    edges:
+      - source: subscribe:events
+        target: save:events
+      - source: subscribe:raw
+        target: save:raw
+      - source: subscribe:filtered
+        target: save:filtered
+    rate: 1
