@@ -2,4 +2,3 @@ timeflux>=0.16.0
 timeflux_ui>=0.5.2
 timeflux_dsp>=0.3.4
 timeflux_hackeeg>=0.3.1
-pyriemann>=0.2.7
