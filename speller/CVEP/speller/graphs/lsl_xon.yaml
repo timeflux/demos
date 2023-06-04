@@ -11,6 +11,11 @@ graphs:
         clocksync: true
         dejitter: true
         monotonize: true
+    - id: select
+      module: timeflux.nodes.query
+      class: LocQuery
+      params:
+        key: [F3, F4, C3, Cz, C4, P3, P4]
     - id: pub
       module: timeflux.nodes.zmq
       class: Pub
@@ -18,5 +23,7 @@ graphs:
         topic: raw
     edges:
       - source: eeg
+        target: select
+      - source: select
         target: pub
     rate: 10
