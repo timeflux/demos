@@ -1,4 +1,4 @@
-# P300 Speller
+# Oddball protocol
 
 This is a fully-configurable Oddball protocol, with visual, auditory and haptic support.
 
