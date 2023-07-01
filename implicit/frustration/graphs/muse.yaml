@@ -1,0 +1,27 @@
+graphs:
+  - id: muse
+    nodes:
+      - id: eeg
+        module: timeflux.nodes.lsl
+        class: Receive
+        params:
+          prop: type
+          value: EEG
+          unit: s
+          sync: None
+      - id: pub_eeg
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: eeg
+      - id: reindex
+        module: timeflux.nodes.dejitter
+        class: Reindex
+        params:
+          rate: 256
+    edges:
+      - source: eeg
+        target: reindex
+      - source: reindex
+        target: pub_eeg
+    rate: 5

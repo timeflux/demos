@@ -1,0 +1,24 @@
+graphs:
+  - id: Record
+    nodes:
+      - id: sub
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [events, eeg]
+      - id: save
+        module: timeflux.nodes.hdf5
+        class: Save
+        params:
+          path: data
+          complevel: 0
+          min_itemsize: 200
+      - id: debug
+        module: timeflux.nodes.debug
+        class: Display
+    edges:
+      - source: sub:*
+        target: save
+      - source: sub:events
+        target: debug
+    rate: 1

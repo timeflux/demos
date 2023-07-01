@@ -1,0 +1,21 @@
+graphs:
+
+  - id: replay
+    nodes:
+    - id: replay
+      module: timeflux.nodes.hdf5
+      class: Replay
+      params:
+        filename: implicit/frustration/data/20220512-122156-S1-Acq1.hdf5
+        keys:
+          - /eeg
+        speed: 1
+    - id: pub
+      module: timeflux.nodes.zmq
+      class: Pub
+      params:
+        topic: eeg
+    edges:
+    - source: replay:eeg
+      target: pub
+    rate: 10

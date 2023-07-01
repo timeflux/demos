@@ -1,0 +1,66 @@
+import:
+# Input graphs 
+# -------------
+  # - graphs/unicorn.yaml # uncomment this line to use unicorn device
+  # - graphs/muse.yaml # uncomment this line to use muse device
+  # - graphs/replay.yaml #  uncomment this line to use replayed data 
+  - graphs/sinus.yaml #  uncomment this line to use generated data 
+  # - graphs/save.yaml # uncomment this graph to save the data in HDF5
+
+graphs:
+  - id: Broker
+    nodes:
+      - id: proxy
+        module: timeflux.nodes.zmq
+        class: Broker
+
+  - id: UI
+    nodes:
+      - id: ui
+        module: timeflux_ui.nodes.ui
+        class: UI
+        params:
+          routes:
+            frustration: www # app will be available at http://localhost:8000/frustration/
+          settings:
+            grid:
+              grid:
+                rows: 4
+                columns: 4
+            frustration:
+              durations:
+                step: 1000
+                new_grid: 2000
+              keys:
+                activate: true
+                good: b
+                bad: v
+              sessions: 30
+              max_step: 15
+      - id: sub
+        module: timeflux.nodes.zmq
+        class: Sub
+        params:
+          topics: [model, eeg]
+      - id: pub
+        module: timeflux.nodes.zmq
+        class: Pub
+        params:
+          topic: events
+      - id: bp_filter
+        module: timeflux_dsp.nodes.filters
+        class: IIRFilter
+        params:
+          order: 2
+          frequencies: [0.1, 40]
+    edges:
+      - source: ui:events
+        target: pub
+      - source: sub:model
+        target: ui:model
+      - source: sub:eeg
+        target: ui:eeg
+      - source: sub:eeg
+        target: bp_filter
+      - source: bp_filter
+        target: ui:filtered_eeg
